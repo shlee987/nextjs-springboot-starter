@@ -21,3 +21,12 @@
 - 로컬 비밀 파일과 생성 산출물은 실제 프로젝트 구성에 맞춰 Git 추적에서 제외한다.
 - 커밋 전 변경 파일과 스테이징 내용을 확인하여 민감정보 및 불필요한 파일 포함 여부를 검토한다.
 - 개발자 PC의 절대 경로에 의존하지 않고 저장소 기준 상대 경로를 사용한다.
+
+## 구현 설계와 공식 문서 확인
+
+- 구현·설정 작업 전에 `docs/implementation/README.md`와 `docs/implementation/decisions.md`를 읽고, 담당 영역의 설계문서를 적용한다.
+- 공통 보안 지침의 공식 URL은 설계 근거다. 일상 구현에서는 해당 근거를 구체화한 `docs/implementation/security/`의 요구사항·설정·검증 계약을 우선 참조한다.
+- 같은 작업에서 공식 URL을 반복 열람하지 않는다. 새 버전·제품·기능·인증/배포 구조·보안 권고·실제 동작 불일치가 발생하면 설계 담당자가 해당 공식 자료를 다시 확인하고 설계와 검증 기준을 갱신한다. 이 항목은 공통 보안 guide의 참조 절차를 이 프로젝트에 구체화한다.
+- 보안 작업은 `docs/implementation/security/controls.md`의 공통 보완 통제와 `docs/implementation/security/asvs-mapping.md`의 해당 조항을 함께 적용한다. V01~V22는 `docs/implementation/security/verification.md`, V23~V36은 `docs/implementation/security/test-cases.md`를 기준으로 검증한다.
+- 미결정 항목과 설계 기본안을 사용자 확정 사실로 취급하지 않는다. 관련 결정 관문이 해소되기 전에 작업자가 임의의 방식으로 구현하지 않는다.
+- 설계·구현·검증 통과를 구분하고, 요구사항 ID에 구현 위치와 검증 증거를 연결한다. 운영 보안 완화나 미검증 항목을 완료로 보고하지 않는다.
