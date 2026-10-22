@@ -1,0 +1,11 @@
+type {{ComponentName}}Props = {
+  /** {{표시할 값의 의미}} */
+  {{propName}}: string;
+};
+
+/**
+ * {{컴포넌트가 제공하는 UI 역할}}
+ */
+export function {{ComponentName}}({ {{propName}} }: {{ComponentName}}Props) {
+  return <div>{{{propName}}}</div>;
+}

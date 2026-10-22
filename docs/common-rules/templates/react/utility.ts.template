@@ -1,0 +1,8 @@
+/**
+ * {{변환의 목적과 결과}}
+ * @param value {{입력의 의미}}
+ * @returns {{출력의 의미}}
+ */
+export function {{functionName}}(value: string): string {
+  return {{resultExpression}};
+}

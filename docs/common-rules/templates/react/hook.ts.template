@@ -1,0 +1,12 @@
+import { useState } from 'react';
+
+/**
+ * {{관리하는 상태와 제공하는 동작}}
+ * @param initialValue 상태의 초기값
+ * @returns 현재 값과 값을 설정하는 함수
+ */
+export function {{useHookName}}(initialValue: string) {
+  const [value, setValue] = useState(initialValue);
+
+  return { value, setValue };
+}

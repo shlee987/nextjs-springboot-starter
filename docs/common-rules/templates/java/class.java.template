@@ -1,0 +1,7 @@
+package {{packageName}};
+
+/**
+ * {{클래스의 역할}}
+ */
+public class {{ClassName}} {
+}

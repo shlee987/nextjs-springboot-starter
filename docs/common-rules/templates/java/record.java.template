@@ -1,0 +1,8 @@
+package {{packageName}};
+
+/**
+ * {{데이터의 역할}}
+ * @param {{fieldName}} {{값의 의미}}
+ */
+public record {{RecordName}}({{FieldType}} {{fieldName}}) {
+}
