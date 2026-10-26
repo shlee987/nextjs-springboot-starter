@@ -1,0 +1,50 @@
+{
+  "name": "starter-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "npm@12.2.0",
+  "engines": {
+    "node": "24.22.1",
+    "npm": "12.2.0"
+  },
+  "scripts": {
+    "local": "node scripts/run.mjs dev local",
+    "build": "node scripts/run.mjs build local",
+    "start": "next start --hostname 127.0.0.1",
+    "build:local": "node scripts/run.mjs build local",
+    "build:dev": "node scripts/run.mjs build dev",
+    "build:stg": "node scripts/run.mjs build stg",
+    "build:prod": "node scripts/run.mjs build prod",
+    "typecheck": "node scripts/run.mjs typecheck local",
+    "lint": "eslint . --max-warnings=0",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "api:gen": "orval --config orval.config.ts"
+  },
+  "dependencies": {
+    "next": "16.4.3",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "@tanstack/react-query": "5.104.5",
+    "axios": "1.20.0",
+    "zustand": "5.0.16",
+    "react-hook-form": "7.91.0",
+    "zod": "4.6.7",
+    "@hookform/resolvers": "6.0.0",
+    "radix-ui": "1.8.1",
+    "ag-grid-community": "36.2.0",
+    "ag-grid-react": "36.2.0",
+    "echarts": "6.1.0"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3",
+    "orval": "8.45.0",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.4.3",
+    "prettier": "3.9.10",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@types/node": "24.19.2"
+  }
+}
