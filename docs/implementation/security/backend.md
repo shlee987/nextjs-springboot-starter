@@ -1,6 +1,6 @@
 # API·인증·권한·데이터 설계
 
-D04를 해소하기 전 인증 코드를 생성하지 않는다. 아래 P1 세션 방식은 설계 기본안이다. 제품 API 경로·역할 표는 [공통 명세 양식](../engineering.md)으로 확정한다.
+1차에는 [프로젝트 세팅](../initial-setup.md)의 Security·Redis 공유 세션·CSRF·기본 거부·공통 오류 기반을 구현할 수 있다. D04의 실제 로그인/provider·계정 검증 코드는 해당 기능 설계 후 구현한다. 제품 API 경로·역할 표는 [공통 명세 양식](../engineering.md)으로 확정하며 [공통 응답 계약](../api-contract.md)은 1차부터 적용한다.
 
 ## API01 — 접근 제어와 필터
 
@@ -24,12 +24,12 @@ D04를 해소하기 전 인증 코드를 생성하지 않는다. 아래 P1 세�
 | --- | --- |
 | 세션 발급 | Spring이 검증한 사용자에 한해 프레임워크 세션 생성. 자체 세션 토큰 알고리즘 금지 |
 | 운영 쿠키 | __Host-session, Secure, HttpOnly, SameSite=Lax, Path=/, Domain 미지정, 브라우저 세션 쿠키 |
-| local HTTP 쿠키 | 별도 이름 dev-session, HttpOnly, Lax, Path=/, Domain 미지정, Secure 예외는 루프백만 |
+| local HTTP 쿠키 | 별도 이름 local-session, HttpOnly, Lax, Path=/, Domain 미지정, Secure 예외는 루프백만 |
 | 수명 | 유휴 30분, 절대 8시간. 서버 강제, 유휴 만료 설정만으로 절대 만료를 구현했다고 판단 금지 |
 | 세션 교체 | 로그인·권한 상승 시 ID 교체, 이전 ID 무효화. 비밀번호 변경·계정 정지 때 관련 세션 폐기 |
 | 로그아웃 | CSRF 보호된 변경 메서드, 서버 세션 폐기와 동일 속성으로 쿠키 삭제. GET 로그아웃 금지 |
 | 세션 전달 | 쿠키만 허용, URL rewriting·쿼리 세션 ID 금지 |
-| 수평 확장 | 공유 저장소·TTL·암호화·접근권한을 D05에서 확정. 재시작/저장소 장애는 인증 우회 없이 실패 |
+| 수평 확장 | Spring Session Redis를 기본 기반으로 사용. namespace·직렬화·TTL·보안 계약과 다중 서버 시험은 authentication-foundation.md. 장애 시 로컬 메모리 fallback 금지 |
 | 재인증 | 비밀번호·이메일·권한·결제 등 민감 변경은 최근 인증 또는 MFA 조건을 API별로 명시 |
 
 출처: [OWASP Session Management](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html). 쿠키명·시간·프로필은 프로젝트의 선택이다. 쿠키가 Next에도 전달되는 단일 출처 기본안이므로 로그·서버 호출 전달 범위를 통제한다.
@@ -80,7 +80,7 @@ D04를 해소하기 전 인증 코드를 생성하지 않는다. 아래 P1 세�
 
 프록시와 애플리케이션 제한의 경계값과 둘 중 어디서 거절됐는지를 검증한다. 요청 압축은 기본 미지원, 도입 시 압축 해제 후 크기도 제한한다. timeout은 실제 라이브러리 의미가 다르므로 단위·범위를 구성별 매핑한다.
 
-오류 기본안은 Problem Details 계열 공통 JSON: type(승인된 고정 문서 URI), title(안전한 문구), status(HTTP와 일치), code(고정 식별자), traceId(서버 생성). 검증 오류에는 허용된 field·code만 추가하며 rejectedValue·스택·SQL·경로·원문 예외를 반환하지 않는다. 204 응답에는 본문이 없다.
+성공·오류의 정확한 필드·상태·페이지·반환 편의 함수는 [공통 API 응답 계약](../api-contract.md)이 소유한다. 오류는 Problem Details 계열이며 type·title·status·code·traceId와 필요한 fieldErrors만 사용한다. 미분류 예외는 500·INTERNAL_ERROR로 정규화하고 모든 환경에서 실제 예외 정보는 비공개다. 처리 경계·로그·비노출 시험은 공통 API 응답 8절과 configuration.md의 CFG06을 적용한다. 검증 오류의 각 항목에는 허용된 field·code만 넣고 rejectedValue·스택·SQL·내부 경로·원문 예외를 반환하지 않는다. 204 응답에는 본문이 없다.
 
 근거: [REST Security](https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html), [Input Validation](https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html). limit 값과 오류 스키마는 프로젝트 설계안이며 별도 API 문서에서 최종 고정한다.
 
@@ -117,3 +117,23 @@ D04를 해소하기 전 인증 코드를 생성하지 않는다. 아래 P1 세�
 - JWT/OIDC·추가 프로토콜: GOV12/GOV13, 도입 시 V34/V35.
 
 위 항목은 기존 원칙에 추가하는 상세 계약이다. 관련 D 관문과 확정 API 명세를 우선 확인한다.
+
+## Redis 공유 기반과 향후 인증 확장
+
+[공유 세션 설계](../authentication-foundation.md)를 적용한다. 일반 로그인·SAML·OIDC·agent의 내부 사용자/권한·세션 수명주기를 분리한다. 외부 provider는 실제 필요할 때만 활성화한다. 기본 SameSite=Lax가 SAML cross-site POST에 충분하다고 가정하지 않고 해당 binding 도입 시 쿠키/요청 저장·복원 계약을 명시한다. Docker는 로컬 준비 도구이며 runtime 인증 경로는 Docker를 호출하지 않는다.
+
+## API05 보완 — 검증 메시지 관리 기본안
+
+Bean Validation은 사용자 확정이다. 아래 메시지 관리 방식은 프로젝트 설계 기본안이며 범용 공통 룰에 넣지 않는다. 실제 오류 코드 목록·문구·필드 구조는 API 명세에서 확정한다.
+
+- 오류 식별자와 표시 문구를 분리한다. 클라이언트 분기·필드 매핑은 고정 code/field로 수행하며 한국어 문구 비교로 분기하지 않는다.
+- Bean Validation의 문구는 DTO마다 직접 반복 작성하지 않고 메시지 키로 참조하는 resource bundle로 관리한다. 업무 오류도 고정 코드와 메시지 키를 공통 오류 정의에서 연결한다. 프레임워크 기본 영문 문구·예외 getMessage를 그대로 반환하지 않는다.
+- API05의 fieldErrors 배열 항목에는 허용된 field·code만 넣는다. 이 계약을 설명 없이 field별 raw message 반환으로 바꾸지 않는다. 백엔드 메시지 자원은 안전한 title 및 허용된 서버 응답 문구 생성에 사용한다.
+- 프론트는 Zod와 API 오류 표시에서 사용하는 문구를 공통 메시지 모듈로 모은다. 서버 오류 code/field를 허용된 문구·입력란으로 매핑하고 알 수 없는 코드는 일반 오류로 표시한다. 서버 내부 필드명·코드 원문을 사용자에게 그대로 노출하지 않는다.
+- field가 없는 오류는 폼 상단/전역 영역, 알려진 field 오류는 해당 입력란에 표시한다. 동일 오류를 입력란·toast에서 중복 알림하지 않는다. 서버 필드 오류를 해당 폼에 연결하는 책임은 폼 경계에 둔다.
+- 길이·범위의 숫자는 DTO/Zod의 검증 조건과 문구에서 일치해야 한다. 예제 API별 검증 명세에 조건과 예상 코드를 함께 기록하고 프론트/백엔드의 일치 여부를 검증한다. Java와 TypeScript가 한 파일의 규칙을 자동 공유한다고 가정하지 않는다.
+- 현재 한국어 기본 문구만 제공하며 추가 다국어 패키지·메시지 관리 DB·동적 편집 화면은 기본 도입하지 않는다. 언어 확대 시 locale 선택·허용 언어·fallback을 별도 결정한다.
+- 응답·문구에 rejectedValue, 비밀번호·토큰·SQL·스택·내부 경로를 포함하지 않는다. 로그인 오류는 사용자 존재 여부를 드러내지 않는 통일된 문구를 사용한다.
+- 구현 검증은 누락 메시지 키·알 수 없는 오류 코드 fallback·필드 매핑·Zod와 서버의 조건 일치·비밀값 미노출을 포함한다.
+
+근거: [Spring 검증과 MessageSource](https://docs.spring.io/spring-framework/reference/core/validation/beanvalidation.html). 코드와 문구의 소유권·표시 정책은 프로젝트 기본안이다.

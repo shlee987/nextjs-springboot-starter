@@ -12,7 +12,7 @@
 - 널리 사용하는 프론트엔드·백엔드 조합의 기본 설정과 보안 설정을 재사용 가능한 예제로 제공한다.
 - 프론트엔드는 Next.js, React, TypeScript를 사용한다.
 - 백엔드는 Java, Spring Boot 기반 API 서버이며 업무 로직과 데이터 처리를 담당한다.
-- 프론트엔드와 백엔드는 하나의 저장소에서 관리한다. 세부 버전과 추가 도구는 실제 구성 시 결정한다.
+- 프론트엔드와 백엔드는 하나의 저장소에서 관리한다. 확정 기본 구성과 버전은 `docs/implementation/stack-versions.md`, 문서 전용 대안은 `docs/implementation/stack-alternatives.md`를 따른다.
 
 ## 공개 저장소 기준
 
@@ -25,8 +25,17 @@
 ## 구현 설계와 공식 문서 확인
 
 - 구현·설정 작업 전에 `docs/implementation/README.md`와 `docs/implementation/decisions.md`를 읽고, 담당 영역의 설계문서를 적용한다.
+- 현재 1차는 프로젝트 세팅이다. `docs/implementation/initial-setup.md`의 단계 범위와 `docs/implementation/api-contract.md`의 공통 응답을 적용한다. 후속 업무·로그인·UI 상세 미정은 해당 기능만 보류하며 1차 기반 구성을 막지 않는다.
 - 공통 보안 지침의 공식 URL은 설계 근거다. 일상 구현에서는 해당 근거를 구체화한 `docs/implementation/security/`의 요구사항·설정·검증 계약을 우선 참조한다.
 - 같은 작업에서 공식 URL을 반복 열람하지 않는다. 새 버전·제품·기능·인증/배포 구조·보안 권고·실제 동작 불일치가 발생하면 설계 담당자가 해당 공식 자료를 다시 확인하고 설계와 검증 기준을 갱신한다. 이 항목은 공통 보안 guide의 참조 절차를 이 프로젝트에 구체화한다.
 - 보안 작업은 `docs/implementation/security/controls.md`의 공통 보완 통제와 `docs/implementation/security/asvs-mapping.md`의 해당 조항을 함께 적용한다. V01~V22는 `docs/implementation/security/verification.md`, V23~V36은 `docs/implementation/security/test-cases.md`를 기준으로 검증한다.
 - 미결정 항목과 설계 기본안을 사용자 확정 사실로 취급하지 않는다. 관련 결정 관문이 해소되기 전에 작업자가 임의의 방식으로 구현하지 않는다.
 - 설계·구현·검증 통과를 구분하고, 요구사항 ID에 구현 위치와 검증 증거를 연결한다. 운영 보안 완화나 미검증 항목을 완료로 보고하지 않는다.
+
+## 규칙의 적용 범위와 관리 위치
+
+- 모든 프로젝트에 재사용할 개발 규칙은 docs/common-rules에서 관리한다. 특정 프로젝트의 기술 선택·제품 버전·환경·업무 계약을 범용 규칙에 넣지 않는다.
+- 현재 프로젝트 전체에 적용하는 선택과 설정 원칙은 루트 AGENTS.md와 docs/implementation에서 관리한다. 영역별 계약은 해당 설계 문서가 소유하고 다른 문서에서는 연결한다.
+- 프로젝트에서 발견한 사항을 범용 규칙으로 개선할 때는 프로젝트 전제를 제거하고 기존 규칙 개정 절차에 따라 관리 원본과 저장소 사본의 일관성을 확인한다.
+- 데이터 접근 구현 전 docs/implementation/persistence.md의 MyBatis 데이터 접근 계약과 검증 기준을 읽는다.
+- 기본 구성은 반복해서 재사용할 기능만 포함한다. 선택 도구는 설명·도입 조건을 문서에만 보존하며 의존성·샘플 코드·설정·CI를 미리 추가하지 않는다. 테스트 도구도 동일하다. 실제 업무·회귀 위험이 생기면 필요한 도구와 이유를 추천하고 적용 범위를 정한다. 검증 기준과 완료 증거는 유지하고 자동화 미실행을 통과로 표시하지 않는다.

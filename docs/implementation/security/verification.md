@@ -20,13 +20,13 @@
 | V06 | API03 | CSRF 누락·오류·로그인 전/후·로그아웃 후·정상 토큰 | 변경 요청 403 또는 정상 계약. 첫 요청·토큰 재발급 정상 |
 | V07 | API03 | 허용/금지/유사 origin·null·다른 포트·preflight | 금지 출처 readable credential 응답 없음. 허용 origin만 정확 반영 |
 | V08 | HDR01~HDR06 | 생산 빌드·진입 프록시에서 일반/보호/로그인/404/500/413/429/502 GET | 해당 헤더 값·중복·캐시·안전한 본문 일치 |
-| V09 | HDR03, HDR06 | 두 요청 nonce 비교·위조 x-nonce·새로고침·prefetch·RSC·라우트 이동 | nonce 신규·문서 내 일치, 정상 UI에 예상 밖 CSP 위반 없음 |
-| V10 | FE02, HDR03 | 격리된 XSS/inline event/nonce 없는 script/외부 frame 검증 | 실행·임베딩 차단, 검증 코드 운영 산출물 미포함 |
+| V09 | HDR03, HDR06, HDR07 | 두 요청 nonce 비교·위조 x-nonce·새로고침·prefetch·RSC·라우트 이동 | nonce 신규·문서 내 일치, 정상 UI에 예상 밖 CSP 위반 없음 |
+| V10 | FE02, HDR03, HDR07 | 격리된 XSS/inline event/nonce 없는 script/외부 frame 검증 | 실행·임베딩 차단, 검증 코드 운영 산출물 미포함 |
 | V11 | FE01, FE04, CFG05 | 합성 canary 비밀을 서버에 주입하고 HTML/JS/RSC/map/log/image/artifact 검색 | 브라우저·공개 결과물에 서버 canary 미노출 |
 | V12 | FE03, HDR04 | 사용자 A/B·로그아웃·뒤로가기·CDN·서버 fetch 캐시 | 교차 사용자 데이터·nonce 재사용 없음, 보호 응답 no-store |
 | V13 | API05, SEC03 | 경계 길이/크기/JSON 깊이/배열·unknown field/정렬·SQL 문자·잘못된 type | 400/413/415 등 계약과 일치, 쿼리/실행 문맥으로 탈출 불가 |
 | V14 | API04, API05, OPS02 | 계정/IP 한도·위조 forwarded IP·다중 인스턴스·저장소 장애 | 429·Retry-After 또는 계약한 503, 우회·무한 대기 없음 |
-| V15 | API05, API07, OPS03 | Spring 필터·컨트롤러·프록시 오류, 로그 injection·시크릿 입력 | 안전한 오류 스키마, 토큰·원문 개인정보 미노출, trace 연결 |
+| V15 | API05, API07, CFG06, OPS03 | 필터·MVC·/error·프록시 오류, 중첩 cause 합성 표식·노출 유도 파라미터·로그 injection | 허용 오류 필드만, 메시지·스택·SQL·내부 경로·비밀값 미노출, HTTP 상태·traceId 일치. 상세는 api-contract.md 8절 |
 | V16 | OPS01~OPS05 | 외부 포트·관리 endpoint·DB runtime DDL·TLS/hostname 오류 검사 | 비허용 경로·권한·인증서 거부, liveness 비밀 미노출 |
 | V17 | OPS04, CI03 | image/IaC 검사와 실제 non-root·capability·mount·자원 제한 확인 | socket/privileged/내장 키 없음, 필요한 기능 정상 |
 | V18 | OPS05, OPS06, CFG04 | 격리 환경 백업 복구·시크릿 회전·인증서 갱신·경보 시험 | 데이터 복원·이전 자격 폐기·경보/대응 런북 동작 |
@@ -74,3 +74,7 @@ active scan·brute force·업로드 악성 payload·DoS는 사용자가 허가�
 [상세 시험](test-cases.md)의 V23~V36을 위 표와 함께 적용한다. 입력 해석, 필드 권한, 동시성, 세션 통제, MFA/복구, 암호화, 데이터 보호, 감사 무결성, 자원·패치, HTTP 노출, 표준 차이, JWT/OIDC·추가 기능, 공급망 증거를 검증한다.
 
 ASVS 분류 345개는 [조항 대조표](asvs-mapping.md)를 기준으로 증거를 연결한다. 문서 검토 결과는 [검토 보고](review-report.md)에 있으며 36개 동작 시험의 실행 결과와 다르다. 전체 L3나 미선택 제품의 적합성을 이번 검토 통과로 간주하지 않는다.
+
+## 공유 세션·환경 독립성 추가 기준
+
+[인증 기반](../authentication-foundation.md)의 AF01~AF08을 관련 공통·provider 시험으로 연결한다. 기존 V01~V36을 대체하지 않는다. Docker 없는 호스트에서 외부 격리 DB/Redis로 실행하는 이식 시험도 [로컬 환경](../local-environment.md)의 완료 기준에 포함한다. 모두 실행 전 계획이다.

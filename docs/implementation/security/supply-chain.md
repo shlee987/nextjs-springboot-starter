@@ -28,7 +28,9 @@ pull_request_target·workflow_run 등 권한 상승 경로에서 외부 head che
 
 ## CI03 — 의존성과 빌드
 
-지원 버전·출처·라이선스·직접/전이 의존성을 목록화한다. frontend lockfile 필수, backend도 버전/BOM·wrapper·checksum 또는 동등 무결성 통제를 명세한다. 동적 latest·SNAPSHOT·범위 해석이 운영 재현성을 깨지 않게 한다.
+지원 버전·출처·라이선스·직접/전이 의존성을 목록화한다. frontend lockfile과 패키지 관리자가 자동 관리하는 integrity는 유지하고, backend는 버전/BOM·의존성 잠금·Wrapper 배포 checksum을 유지한다. 동적 latest·SNAPSHOT·범위 해석이 운영 재현성을 깨지 않게 한다.
+
+사용자 결정: 기본 구성은 실제 취약점 대응과 안전한 기본 설정에 집중한다. Gradle 의존성별 수동 체크섬 등록, 패키지 버전별 설치 승인 및 게시 경과 시간 예외 목록처럼 일상 의존성 갱신마다 별도 수동 대장을 요구하는 강화 정책은 기본에서 제외한다. 필요 조직 정책이 있을 때 [문서 전용 선택사항](../stack-alternatives.md)으로 검토한다. 이를 ISMS의 특정 파일 의무나 누락 즉시 취약점으로 설명하지 않는다. lockfile 자동 integrity와 Wrapper checksum은 별개이며 유지한다. 알려진 취약점 확인·패치, 비밀 비노출, 인증·권한·CSRF·CSP·TLS 등 기존 대응 계약은 유지한다.
 
 패키지 설치 스크립트·빌드 plugin·새 registry는 실행 코드로 취급한다. 무근거 전체 lifecycle 해제 대신 필요한 설치와 공급망 위험을 검토한다. 비밀 없는 빌드, 승인 registry, 오염된 캐시 격리를 구현한다.
 
@@ -42,7 +44,7 @@ pull_request_target·workflow_run 등 권한 상승 경로에서 외부 head che
 | workflow 변경 | workflow lint와 script injection·권한·pin 검토 |
 | build | 생산 빌드, 번들 비밀 노출·금지 dev 설정, 필요한 SBOM |
 | image/IaC 조건부 | image/IaC/misconfiguration 검사, 실제 자원 제한·권한 검토 |
-| staging | 실제 프록시 포함 헤더·CSP·쿠키·권한·CSRF·기능, ZAP DAST |
+| stg | 실제 프록시 포함 헤더·CSP·쿠키·권한·CSRF·기능, ZAP DAST |
 | release | 열린 finding/예외 만료·증거·정확한 artifact·배포 자격 확인 |
 | after deployment | health와 인증·권한·헤더 smoke, 실패 시 트래픽 중단/검증된 복구 절차 |
 
