@@ -1,0 +1,6 @@
+.private
+.env*
+!.env.example
+logs
+*.log
+*.dump
