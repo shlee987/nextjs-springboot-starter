@@ -1,0 +1,5 @@
+# stg는 prod와 같은 기본 보안 정책을 사용한다.
+spring:
+  config:
+    activate:
+      on-profile: stg

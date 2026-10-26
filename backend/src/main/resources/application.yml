@@ -1,0 +1,85 @@
+spring:
+  application:
+    name: starter-api
+  web:
+    error:
+      include-exception: false
+      include-message: never
+      include-binding-errors: never
+      include-stacktrace: never
+      include-path: never
+      whitelabel:
+        enabled: false
+  mvc:
+    log-request-details: false
+    problemdetails:
+      enabled: false
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      maximum-pool-size: 10
+      connection-timeout: 3000
+  sql:
+    init:
+      mode: never
+  flyway:
+    enabled: false
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      username: ${REDIS_USERNAME}
+      password: ${REDIS_PASSWORD}
+      connect-timeout: 3s
+      timeout: 3s
+      ssl:
+        enabled: true
+  session:
+    timeout: 30m
+    data:
+      redis:
+        repository-type: indexed
+        namespace: starter:${spring.profiles.active}:session:v1
+        configure-action: none
+server:
+  port: 8080
+  forward-headers-strategy: none
+  max-http-request-header-size: 16KB
+  servlet:
+    session:
+      tracking-modes: cookie
+      cookie:
+        name: __Host-session
+        http-only: true
+        secure: true
+        same-site: lax
+        path: /
+  tomcat:
+    max-http-form-post-size: 1MB
+    max-swallow-size: 1MB
+    connection-timeout: 10s
+mybatis:
+  configuration:
+    default-executor-type: SIMPLE
+    cache-enabled: false
+    local-cache-scope: STATEMENT
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+logging:
+  level:
+    root: INFO
+    org.springframework.web: WARN
+    org.mybatis: WARN
+    org.apache.ibatis: WARN
+    com.zaxxer.hikari: WARN
+  structured:
+    format:
+      console: logstash
+app:
+  public-origin: ${APP_PUBLIC_ORIGIN}

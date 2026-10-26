@@ -1,0 +1,40 @@
+# 비밀값과 개인 환경 (공개 예제만 추적)
+.env
+.env.*
+!.env.example
+!.env.*.example
+**/secrets/
+**/.secrets/
+**/.private/
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.private.pem
+id_rsa
+id_ed25519
+*.hprof
+*.jfr
+*.dump
+*.sql.gz
+*.log
+logs/
+tmp/
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Java / Gradle
+**/.gradle/
+**/build/
+**/out/
+
+# Node / Next
+**/node_modules/
+**/.next/
+**/coverage/
+**/*.tsbuildinfo
+**/.pnpm-store/

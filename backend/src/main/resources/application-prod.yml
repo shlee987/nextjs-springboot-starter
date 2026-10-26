@@ -1,0 +1,5 @@
+# 운영에서 문서 공개·자동 DDL·진단 응답을 활성화하지 않는다.
+spring:
+  config:
+    activate:
+      on-profile: prod

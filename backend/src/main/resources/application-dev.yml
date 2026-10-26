@@ -1,0 +1,5 @@
+# 공유 dev는 공통 HTTPS·Secure 쿠키·TLS 정책을 유지한다.
+spring:
+  config:
+    activate:
+      on-profile: dev
