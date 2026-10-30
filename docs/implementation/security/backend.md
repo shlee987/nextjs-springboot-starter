@@ -1,5 +1,7 @@
 # API·인증·권한·데이터 설계
 
+> 2026-10-29: 현재 [백엔드 최종 설계](../backend-foundation.md)와 [API 인계표](../backend-handoff.md)를 함께 적용한다. 기존 1차 기반은 이력이고 JWT·로그인·권한 모델은 이번에 상세 확정했으며 아직 구현/실행 전이다.
+
 1차에는 [프로젝트 세팅](../initial-setup.md)의 Security·Redis 공유 세션·CSRF·기본 거부·공통 오류 기반을 구현할 수 있다. D04의 실제 로그인/provider·계정 검증 코드는 해당 기능 설계 후 구현한다. 제품 API 경로·역할 표는 [공통 명세 양식](../engineering.md)으로 확정하며 [공통 응답 계약](../api-contract.md)은 1차부터 적용한다.
 
 ## API01 — 접근 제어와 필터
@@ -18,26 +20,15 @@
 권한은 endpoint·서비스의 실제 업무 경계에서 강제하고 ID를 UUID로 바꾸는 것으로 대체하지 않는다.
 근거: [OWASP Authorization](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html).
 
-## API02 — P1 인증·세션 기본안
+## API02 — JWT·인증 상태·공유 세션
 
-| 정책 | 프로젝트 기본안 |
-| --- | --- |
-| 세션 발급 | Spring이 검증한 사용자에 한해 프레임워크 세션 생성. 자체 세션 토큰 알고리즘 금지 |
-| 운영 쿠키 | __Host-session, Secure, HttpOnly, SameSite=Lax, Path=/, Domain 미지정, 브라우저 세션 쿠키 |
-| local HTTP 쿠키 | 별도 이름 local-session, HttpOnly, Lax, Path=/, Domain 미지정, Secure 예외는 루프백만 |
-| 수명 | 유휴 30분, 절대 8시간. 서버 강제, 유휴 만료 설정만으로 절대 만료를 구현했다고 판단 금지 |
-| 세션 교체 | 로그인·권한 상승 시 ID 교체, 이전 ID 무효화. 비밀번호 변경·계정 정지 때 관련 세션 폐기 |
-| 로그아웃 | CSRF 보호된 변경 메서드, 서버 세션 폐기와 동일 속성으로 쿠키 삭제. GET 로그아웃 금지 |
-| 세션 전달 | 쿠키만 허용, URL rewriting·쿼리 세션 ID 금지 |
-| 수평 확장 | Spring Session Redis를 기본 기반으로 사용. namespace·직렬화·TTL·보안 계약과 다중 서버 시험은 authentication-foundation.md. 장애 시 로컬 메모리 fallback 금지 |
-| 재인증 | 비밀번호·이메일·권한·결제 등 민감 변경은 최근 인증 또는 MFA 조건을 API별로 명시 |
+[최종 인증 계약](../authentication-foundation.md)이 인증과 쿠키·키·만료·로그아웃을 소유한다. 일반 API는 JWT+공유 AuthLogin 상태, 기본 Redis/선택JDBC. Spring Session은 외부 로그인 진행용으로 조건부 공존하며 API 인증 대체 불가. 세션 테이블·토큰 테이블을 분리하고 장애 시 메모리 fallback 금지. 미사용30분/절대8시간, access10분, 동시정책allow/deny-new/replace-old. 기존 P1 최대3개 정책은 폐기했다.
 
-출처: [OWASP Session Management](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html). 쿠키명·시간·프로필은 프로젝트의 선택이다. 쿠키가 Next에도 전달되는 단일 출처 기본안이므로 로그·서버 호출 전달 범위를 통제한다.
-
+최근 인증·MFA가 필요한 고위험 API는 별도 기능 계약을 추가한다. 관리자 운영 공개는 기존 MFA 관문을 유지하며 지금 MFA를 임의 구현하지 않는다.
 ## API03 — CSRF와 CORS
 
 - 쿠키 인증에서는 CSRF 유지. SameSite·CORS·API라는 이름을 근거로 해제하지 않는다.
-- 기본안은 Spring의 세션 CSRF 저장소와 JSON 토큰 발급 endpoint다. API 명세에서 고정한 endpoint는 토큰을 실제 materialize하고 token·headerName만 반환하며 Cache-Control: no-store를 적용한다.
+- 일반 API는 Spring CookieCsrfTokenRepository와 JSON 발급 endpoint를 사용해 불필요한 HttpSession 생성을 막는다. 쿠키·Origin·XOR 표현 계약은 최종 인증 설계를 따른다. API 명세에서 고정한 endpoint는 토큰을 실제 materialize하고 token·headerName만 반환하며 Cache-Control: no-store를 적용한다.
 - 브라우저 공통 요청 경계는 발급된 토큰을 지정 헤더로 POST·PUT·PATCH·DELETE에 전달한다. 누락·오류는 403과 고정 오류코드로 반환한다.
 - 발급 endpoint는 미인증에서도 로그인 CSRF 토큰을 받을 수 있으나 공개된 비밀 endpoint로 오해하지 않는다. 다른 출처에서 읽을 수 없도록 하며 발급 남용에도 한도를 적용한다.
 - Spring의 deferred token·BREACH 표현과 resolve 동작을 선택한 버전에서 일치시킨다. 쿠키의 raw token과 XOR token을 혼용하지 않는다.
@@ -57,7 +48,7 @@
 - 프로젝트 기본안 Argon2id m=19456 KiB, t=2, p=1 이상, 랜덤 salt 라이브러리 관리. 배포 하드웨어에서 부하·지연·동시성 시험 뒤 비용 확정, 알고리즘 식별자 포함 저장.
 - Spring encoder 라이브러리·의존성·파라미터 API를 버전 고정 후 명세. 평문·가역 암호·단순 SHA 해시 금지.
 - 존재/미존재/잠김 계정의 실패 메시지·상태 일관성 유지, 미존재 계정도 유사 비용 경로. 완전 동일 응답시간을 보장한다고 표현하지 않는다.
-- 로그인은 계정 식별자와 신뢰된 원본 IP를 함께 제한. 기본안 계정별 15분 내 5회 실패 이후 1·2·4·8·16·30초 단계 지연(최대 30초), IP별 30회/분. 지연은 비동기·한정 큐로 처리하고 thread 점유·계정 영구 잠금 금지. 분산 공격·타인 계정 방해를 별도 시험한다. 성공만으로 IP 한도를 무조건 초기화하지 않음.
+- 로그인은 계정 식별자와 신뢰된 원본 IP를 함께 제한. 확정안 계정별15분 내5회 실패 후15분 제한, IP별30회/분. 점증 지연·sleep·계정 영구 잠금은 사용하지 않는다. 분산 공격·타인 계정 방해를 별도 시험한다. 성공만으로 IP 한도를 무조건 초기화하지 않음.
 - 한도 초과는 429·Retry-After. 영구 계정 잠금으로 타인 계정 DoS를 만들지 않음. 한도 저장소를 여러 인스턴스가 공유하고 장애 시 인증 경로는 안전한 503으로 실패.
 - 비밀번호 재설정·회원가입·MFA·메일 변경을 도입하면 단회 토큰·만료·재인증·세션 폐기·재사용 차단 계약을 추가하기 전 공개하지 않음.
 - 관리자 인증에 MFA 필요. IdP·MFA가 미구현이면 관리자 기능 운영 공개를 보류한다.
@@ -92,7 +83,7 @@
 | URL 조회/SSRF | 목적지 allowlist, scheme·port 제한, 해석된 IPv4/IPv6·loopback/private/link-local/metadata 차단, redirect 기본 비활성, DNS 재바인딩과 실제 연결 검증, egress 방화벽 |
 | 웹훅 | 서명·timestamp·replay 차단·body 크기·idempotency·키 회전, 일반 사용자 세션과 다른 인증 계약 |
 | 배치 | API와 같은 자격·권한·감사 보호, 실행 주체·중복/재실행·부분 실패·복구 계약 |
-| JWT/OIDC | issuer·audience·서명 알고리즘·만료·키 교체·nonce/state/PKCE 해당 흐름·폐기·저장 위치를 별도 설계, 자체 JWT 발급을 자동 도입하지 않음 |
+| JWT/OIDC | JWT 자체 로그인은 최종 인증 설계로 명시 채택. OIDC provider 연동만 조건부이며 issuer/서명/키/용도·state/nonce/PKCE를 해당 흐름에서 검증 |
 
 현재 미도입 기능은 route·의존성·설정 자체를 추가하지 않고 N/A 사유로 남긴다.
 근거: [File Upload](https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html), [SSRF](https://cheatsheetseries.owasp.org/cheatsheets/Server_Side_Request_Forgery_Prevention_Cheat_Sheet.html).
@@ -110,7 +101,7 @@
 
 - 필드별 권한·대리 주체: [GOV02](controls.md), V24.
 - 업무 상태·동시성·idempotency: GOV03, V25.
-- 동시 세션 3개·사용자/관리자 폐기: GOV04, V26.
+- 선택 동시 로그인 정책·사용자별 폐기: GOV04, V26.
 - 자체 비밀번호 변경·MFA·복구와 L2 차이: GOV05, V27. 관리자 MFA만으로 전체 L2 충족을 표시하지 않는다.
 - 입력 해석·prototype·중복 key·인젝션: GOV01, V23.
 - 감사 무결성·중앙 수집: GOV08, V30.

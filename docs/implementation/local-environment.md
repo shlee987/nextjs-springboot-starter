@@ -1,5 +1,7 @@
 # Docker 기반 로컬 DB·Redis·테스트 환경 설계
 
+> 후속 인증 변경(2026-10-29): [최종 설계](backend-foundation.md)의 기본은 Redis이며 JDBC 대안도 지원한다. JDBC 모드에서는 Redis 접속·listener·readiness를 요구하지 않는다. Docker는 여전히 local PostgreSQL·Redis 준비 도구이며 구성 자체를 이번 문서 작업에서 변경하지 않았다.
+
 작성일: 2026-10-22 / 갱신: 2026-10-26 / 상태: 사용자 결정에 따라 로컬 예제 구성을 단순화한다. 실제 실행·검증 결과는 infra/local/README.md가 기준이다.
 
 ## 방향

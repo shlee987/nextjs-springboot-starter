@@ -1,6 +1,20 @@
 spring:
   application:
     name: starter-api
+  main:
+    banner-mode: 'off'
+    log-startup-info: false
+  messages:
+    basename: messages/errors
+    fallback-to-system-locale: false
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration
+      - org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration
+      - org.springframework.boot.data.redis.autoconfigure.DataRedisReactiveAutoConfiguration
+      - org.springframework.boot.data.redis.autoconfigure.DataRedisRepositoriesAutoConfiguration
+      - org.springframework.boot.session.data.redis.autoconfigure.SessionDataRedisAutoConfiguration
+      - org.springframework.boot.session.jdbc.autoconfigure.JdbcSessionAutoConfiguration
   web:
     error:
       include-exception: false
@@ -10,6 +24,12 @@ spring:
       include-path: never
       whitelabel:
         enabled: false
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5308416B
+      file-size-threshold: 0B
+      resolve-lazily: true
   mvc:
     log-request-details: false
     problemdetails:
@@ -21,28 +41,29 @@ spring:
     hikari:
       maximum-pool-size: 10
       connection-timeout: 3000
+      connection-init-sql: SET TIME ZONE 'UTC'
+      schema: public
   sql:
     init:
       mode: never
   flyway:
     enabled: false
+    locations: classpath:db/migration/core
   data:
     redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-      username: ${REDIS_USERNAME}
-      password: ${REDIS_PASSWORD}
+      host: ${REDIS_HOST:}
+      port: ${REDIS_PORT:6379}
+      username: ${REDIS_USERNAME:}
+      password: ${REDIS_PASSWORD:}
       connect-timeout: 3s
       timeout: 3s
+      repositories:
+        enabled: false
       ssl:
         enabled: true
   session:
-    timeout: 30m
-    data:
-      redis:
-        repository-type: indexed
-        namespace: starter:${spring.profiles.active}:session:v1
-        configure-action: none
+    jdbc:
+      initialize-schema: never
 server:
   port: 8080
   forward-headers-strategy: none
@@ -50,18 +71,23 @@ server:
   servlet:
     session:
       tracking-modes: cookie
-      cookie:
-        name: __Host-session
-        http-only: true
-        secure: true
-        same-site: lax
-        path: /
   tomcat:
+    max-part-count: 1
+    max-part-header-size: 2KB
     max-http-form-post-size: 1MB
     max-swallow-size: 1MB
     connection-timeout: 10s
+logging:
+  level:
+    root: INFO
+    org.springframework: WARN
+    com.example.starter: INFO
 mybatis:
+  mapper-locations: classpath*:mappers/**/*.xml
   configuration:
+    map-underscore-to-camel-case: true
+    arg-name-based-constructor-auto-mapping: true
+    shrink-whitespaces-in-sql: false
     default-executor-type: SIMPLE
     cache-enabled: false
     local-cache-scope: STATEMENT
@@ -71,15 +97,54 @@ springdoc:
     enabled: false
   swagger-ui:
     enabled: false
-logging:
-  level:
-    root: INFO
-    org.springframework.web: WARN
-    org.mybatis: WARN
-    org.apache.ibatis: WARN
-    com.zaxxer.hikari: WARN
-  structured:
-    format:
-      console: logstash
+    persist-authorization: false
+    validator-url: none
 app:
+  files:
+    root: ${APP_FILES_ROOT:}
   public-origin: ${APP_PUBLIC_ORIGIN}
+  auth:
+    state-store: redis
+    namespace: starter:${spring.profiles.active}:auth
+    namespace-generation: v1
+    concurrent-login: allow
+    access-ttl: 10m
+    idle-timeout: 30m
+    absolute-timeout: 8h
+    jwt:
+      issuer: ${APP_AUTH_JWT_ISSUER:}
+      audience: ${APP_AUTH_JWT_AUDIENCE:}
+      active-key-id: ${APP_AUTH_JWT_ACTIVE_KEY_ID:}
+      private-key-location: ${APP_AUTH_JWT_PRIVATE_KEY_LOCATION:}
+      public-keys-location: ${APP_AUTH_JWT_PUBLIC_KEYS_LOCATION:}
+      clock-skew: 30s
+    failed-login:
+      window: 15m
+      max-attempts: 5
+      lock-duration: 15m
+      ip-max-attempts: 30
+      ip-window: 1m
+    prelogin-session:
+      enabled: false
+      timeout: 10m
+      namespace: starter:${spring.profiles.active}:prelogin
+    csrf:
+      max-age: 8h
+  logging:
+    file-enabled: true
+    directory: ./logs
+    max-file-size: 100MB
+    max-history: 30
+    application-total-cap: 3GB
+    error-total-cap: 1GB
+    sql:
+      enabled: false
+      slow-threshold: 1s
+      max-chars: 16000
+  audit:
+    login-reference-key-location: ${APP_AUDIT_LOGIN_REFERENCE_KEY_LOCATION:}
+    retention-days: ${APP_AUDIT_RETENTION_DAYS:0}
+    query:
+      max-range-days: 31
+  bootstrap:
+    local-data-enabled: false

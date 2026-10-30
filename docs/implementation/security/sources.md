@@ -62,3 +62,27 @@
 ## 구성·버전 후속 확인 — 2026-10-26
 
 0.2 당시 제품 표시 버전은 당시 조사 기록이다. 2026-10-26 기본 구성 선정 결과는 [확정 버전표](../stack-versions.md)에 공식 릴리스·레지스트리·BOM·호환표 근거와 함께 관리한다. D01과 D05의 제품·버전 관문은 해소했다. 버전별 설정 키·실제 구현·CSP·세션·DB 동작 검증은 후속 작업이며 공통 보안 검토를 실행 통과로 변경하지 않는다.
+
+## 백엔드 공통 기반 변경 확인 — 2026-10-29
+
+JWT/공유 상태·외부 로그인 세션·quoted JDBC schema·날짜/숫자·MyBatis 매핑의 새 설계에 필요한 공식 관련 절을 열람했다. Spring Security7.1.2, Spring Session4.1.1, PostgreSQL18 문서를 확인했다. 전문 복제·신규 의존성 설치·호환 실행 검증은 하지 않았다. 프로젝트 정책과 출처의 일반 기능 설명을 구분한다.
+
+| 출처 | 확인한 범위·반영 |
+| --- | --- |
+| https://docs.spring.io/spring-security/reference/servlet/oauth2/resource-server/jwt.html | JWT resource-server/JOSE·검증 설정, Nimbus 재사용 |
+| https://docs.spring.io/spring-security/reference/servlet/exploits/csrf.html | 쿠키 저장소·토큰 표현/공급·상태변경 보호 |
+| https://docs.spring.io/spring-session/reference/configuration/jdbc.html | schema/SQL 사용자화·JSON·정리·트랜잭션 경계 |
+| https://docs.spring.io/spring-session/reference/configuration/redis.html | indexed/JSON/안전 직렬화·namespace |
+| https://docs.spring.io/spring-security/reference/servlet/saml2/login/authentication-requests.html | HttpSession 요청 보관·콜백 복원 확장점 |
+| https://mybatis.org/mybatis-3/configuration.html | mapUnderscoreToCamelCase·plugin·SQL whitespace 설정 |
+| https://www.postgresql.org/docs/18/datatype-datetime.html | date/timestamptz 정밀도·저장과 표시 구분 |
+| https://www.postgresql.org/docs/18/sql-syntax-lexical.html | quoted 대문자 식별자 |
+| https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html | Argon2id·단방향 해시 원칙 |
+| https://www.rfc-editor.org/rfc/rfc9700.html | refresh 회전·재사용 탐지, 자체 API를 OAuth 서버로 주장하지 않음 |
+
+구체적 구조·수치·fence·테이블·API는 [최종 설계](../backend-foundation.md)와 연결 문서의 프로젝트 결정이다.
+
+
+## 2026-10-30 공격 대응·파일 기능 보완
+
+OWASP File Upload·XSS Prevention·SQL Injection Prevention Cheat Sheet와 Spring Security HttpFirewall 공식 문서를 확인했다. 적용 범위·선택한 제한·남은 바이러스 검사/운영 저장소 조건은 [공격 대응·파일 설계](../attack-defense-and-files.md)를 따른다. React 출력 처리를 이유로 서버 입력·파일·소유권 검사를 생략하지 않는다. 단일 필터/파일 시그니처/이미지 재인코딩을 모든 공격이나 악성코드 탐지 보장으로 설명하지 않는다.

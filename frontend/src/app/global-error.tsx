@@ -1,6 +1,7 @@
 'use client';
 
 import { messages } from '@/messages/messages';
+import { Button } from '@/components/ui/Button';
 
 /** 루트 레이아웃 실패에도 진단 정보가 없는 독립 문서를 제공한다. */
 export default function GlobalError({ reset }: { reset: () => void }) {
@@ -9,7 +10,7 @@ export default function GlobalError({ reset }: { reset: () => void }) {
       <body>
         <main>
           <h1>{messages.UNEXPECTED_ERROR}</h1>
-          <button onClick={reset}>다시 시도</button>
+          <Button onClick={reset}>다시 시도</Button>
         </main>
       </body>
     </html>

@@ -26,6 +26,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-session-data-redis'
+    implementation 'org.springframework.boot:spring-boot-starter-session-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation 'org.springframework:spring-aspects'
+    implementation 'org.bouncycastle:bcprov-jdk18on:1.86'
     implementation 'org.springframework.boot:spring-boot-starter-flyway'
     implementation 'org.flywaydb:flyway-database-postgresql'
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:4.1.0'
@@ -51,7 +55,25 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 tasks.named('test') {
-    useJUnitPlatform()
+    useJUnitPlatform { excludeTags 'live' }
+}
+
+// 실제 DB/Redis 쓰기 검증은 기본 test와 분리한다. 실행 전 대상·영향 승인이 필요하다.
+tasks.register('liveAuthTest', Test) {
+    group = 'verification'
+    description = '이미 기동한 승인된 local A/B 서버의 쿠키·공유 인증을 검증한다.'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform { includeTags 'live' }
+}
+
+// DDL 실행 전용이며 bootRun/웹 서버/개발 키 생성을 실행하지 않는다.
+tasks.register('migrateDatabase', JavaExec) {
+    group = 'application'
+    description = '명시한 외부 대상의 승인된 migration을 독립 history 순서로 적용한다.'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'com.example.starter.common.persistence.MigrationMain'
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
 }
 
 // 개인 PC 실행에서만 local을 명시한다. 일반 bootRun과 공유 환경에는 기본값을 추가하지 않는다.

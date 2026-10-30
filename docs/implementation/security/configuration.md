@@ -1,5 +1,7 @@
 # 환경·설정·비밀값 계약
 
+> 후속 설정의 정확 키·기본값·조건부 검증은 [최종 설계 설정표](../backend-foundation.md)가 소유한다. JDBC 모드에서 Redis 필수검증은 하지 않으며 외부 로그인 세션은 별도 enabled 옵션이다. 기존 1차 Redis 전용 접속 설명을 모든 모드에 강제하지 않는다.
+
 CFG ID는 구현 시 설정 정의·시작 검증·검사 증거에 연결한다. 이 표의 변수명은 프로젝트 계약 기본안이며 Spring/Next 내장 환경변수라고 가정하지 않는다. 확정 버전표에 맞춰 구현 시 바인딩 코드·설정 파일·빌드 옵션으로 매핑하고 동일 값을 여러 곳에 중복 정의하지 않는다.
 
 ## CFG01 — 환경 입력 표
@@ -13,11 +15,11 @@ CFG ID는 구현 시 설정 정의·시작 검증·검사 증거에 연결한다
 | 신뢰 프록시 목록 | 진입점·서버 | 직접 연결이면 비활성, 프록시 사용 시 필수 | 실제 proxy CIDR/보안그룹으로 제한, 임의 X-Forwarded-* 신뢰 금지 |
 | DB 연결·사용자·비밀 | backend, 실행 시 | DB 기능 채택 시 필수 | 운영 빈 값·예제 값·관리계정 거부. 로그 출력 금지 |
 | DB TLS·CA | DB client, 실행 시 | 운영 TLS+호스트·인증서 검증 필수 | trust-all·검증 생략·가짜 CA fallback 금지 |
-| 세션 저장소 연결 | API, 실행 시 | Redis 공유 세션 기반에서 필수, 단일 서버도 동일 경로 | endpoint·ACL·TLS·namespace·TTL·serializer·장애 동작 검사. local 예외는 지정 범위만 |
+| 인증 상태 저장소 연결 | API, 실행 시 | redis 기본, jdbc 선택. 선택한 저장소만 필수 | endpoint·ACL·TLS·namespace·TTL·serializer·장애 동작 검사. local 예외는 지정 범위만 |
 | 세션 유휴/절대 수명 | API | 30분/8시간 기본안 | 양수, 절대 >= 유휴, 서버 강제 |
 | 인증·일반 요청 한도 | API/진입점 | backend.md 수치 기본안 | 0·음수·무제한 금지, 저장소 공유 및 장애 정책 |
 | API 크기·타임아웃·페이지 | 각 계층 | backend.md 계약 | 단위와 적용 지점 일치, parser 이전 제한 |
-| 로그 수준·출력 | 전체 | 운영 INFO, 필요한 ERROR 진단 | DEBUG/TRACE·HTTP body 수집 기본 차단 |
+| 로그 수준·출력 | 전체 | root INFO, local SQL 전용DEBUG, local콘솔/shared전체+ERROR파일 | local 우리패키지 상세허용, shared상세SQL/본문로그 기본차단. 회전/보관은 로그 설계 |
 | 쿠키 보안 속성 | API | 운영 고정, backend.md | 운영에서 Secure/HttpOnly 끄는 옵션 금지 |
 | CSP 외부 출처 | Next | 기본 빈 허용목록 | 지시어·정확한 출처별 승인 기록. 사용자 문자열 직접 결합 금지 |
 | 시크릿 공급 경로 | 운영 | 배포 제품 선택 후 필수 | 최소권한 읽기, 마운트 권한, 회전·폐기 절차 |

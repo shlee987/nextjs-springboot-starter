@@ -20,31 +20,34 @@
     "lint": "eslint . --max-warnings=0",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "test:foundation": "node scripts/verify-foundation.mjs",
+    "test:auth": "node scripts/verify-auth.mjs",
     "api:gen": "orval --config orval.config.ts"
   },
   "dependencies": {
-    "next": "16.4.3",
-    "react": "19.3.1",
-    "react-dom": "19.3.1",
-    "@tanstack/react-query": "5.104.5",
-    "axios": "1.20.0",
-    "zustand": "5.0.16",
-    "react-hook-form": "7.91.0",
-    "zod": "4.6.7",
     "@hookform/resolvers": "6.0.0",
-    "radix-ui": "1.8.1",
+    "@tanstack/react-query": "5.104.5",
     "ag-grid-community": "36.2.0",
     "ag-grid-react": "36.2.0",
-    "echarts": "6.1.0"
+    "axios": "1.20.0",
+    "decimal.js": "10.6.0",
+    "echarts": "6.1.0",
+    "next": "16.4.3",
+    "radix-ui": "1.8.1",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "react-hook-form": "7.91.0",
+    "zod": "4.6.7",
+    "zustand": "5.0.16"
   },
   "devDependencies": {
-    "typescript": "6.0.3",
-    "orval": "8.45.0",
-    "eslint": "9.39.5",
-    "eslint-config-next": "16.4.3",
-    "prettier": "3.9.10",
+    "@types/node": "24.19.2",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "@types/node": "24.19.2"
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.4.3",
+    "orval": "8.45.0",
+    "prettier": "3.9.10",
+    "typescript": "6.0.3"
   }
 }

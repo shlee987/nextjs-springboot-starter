@@ -3,6 +3,8 @@ import { headers } from 'next/headers';
 import type { ReactNode } from 'react';
 
 import { AppProviders } from '@/providers/AppProviders';
+import { ScreenActionScope } from '@/providers/ScreenActionScope';
+import { AppShell } from '@/components/layout/AppShell';
 
 import './globals.css';
 
@@ -16,7 +18,11 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html lang="ko">
       <body>
-        <AppProviders nonce={nonce}>{children}</AppProviders>
+        <AppProviders nonce={nonce}>
+          <ScreenActionScope>
+            <AppShell>{children}</AppShell>
+          </ScreenActionScope>
+        </AppProviders>
       </body>
     </html>
   );

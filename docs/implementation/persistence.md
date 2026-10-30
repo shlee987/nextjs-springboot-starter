@@ -1,5 +1,7 @@
 # MyBatis 데이터 접근 설계
 
+> 2026-10-29 상세 확정: [DB 모델·Flyway](backend-data-model.md), [공통 기반 1단계](backend-foundation.md)의 실제 대문자 언더바·quoted SQL·mapUnderscoreToCamelCase=true·명시적 시간/숫자 타입을 적용한다. 단순 매핑 resultMap은 불필요, 조인 별칭/복합 매핑만 명시한다. 기존 트랜잭션·TEMP 연결 계약은 유지하며 JDBC 인증·Spring Session DDL은 별도 소유/선택 migration이다.
+
 상태: MyBatis 단독 사용은 사용자 확정. 설정·예제 구현·실제 DB 검증 전. PostgreSQL 제품·버전과 라이브러리 조합은 [확정 버전표](stack-versions.md)를 따른다.
 
 이 문서는 현재 프로젝트의 공통 계약이다. 모든 프로젝트에 적용하는 공통 룰이 아니며, docs/common-rules에 복사하지 않는다.

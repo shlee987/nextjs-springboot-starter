@@ -1,0 +1,3146 @@
+{
+  "openapi" : "3.1.0",
+  "info" : {
+    "title" : "Starter API",
+    "version" : "1.0"
+  },
+  "servers" : [ {
+    "url" : "/"
+  } ],
+  "paths" : {
+    "/api/auth/password" : {
+      "put" : {
+        "tags" : [ "auth-controller" ],
+        "summary" : "자체 비밀번호 변경",
+        "description" : "유효 access, Origin/CSRF 필요. 400 현재값 오류/동일값, 409 자체 credential 미보유, 503 이력/fence 장애. 모든 로그인 폐기와 재로그인이 필요합니다.",
+        "operationId" : "changePassword",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Password"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "400" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "413" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "415" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "429" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "204" : {
+            "description" : "본문 없음"
+          }
+        },
+        "security" : [ {
+          "cookieAuth" : [ ],
+          "csrfHeader" : [ ]
+        } ]
+      }
+    },
+    "/api/files" : {
+      "get" : {
+        "tags" : [ "file-controller" ],
+        "summary" : "내 파일 목록",
+        "description" : "page0/size20, 최대100. 생성시각DESC+ID. READY만 반환하며 owner는 인증 주체로 결정.",
+        "operationId" : "searchFiles",
+        "parameters" : [ {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 20
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponsePageDataFileInfo"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "413" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "415" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "429" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "cookieAuth" : [ ]
+        } ]
+      },
+      "post" : {
+        "tags" : [ "file-controller" ],
+        "summary" : "본인 PNG/JPEG 저장",
+        "description" : "file part1개,5MiB.8192px/16M픽셀 검사 후 재인코딩. 소유자100MiB. 400 이름/내용,413 크기,415 형식,409 quota,429 처리/횟수,503 저장/DB/감사 장애.",
+        "operationId" : "uploadFile",
+        "requestBody" : {
+          "content" : {
+            "multipart/form-data" : {
+              "schema" : {
+                "type" : "object",
+                "properties" : {
+                  "file" : {
+                    "type" : "string",
+                    "format" : "binary"
+                  }
+                },
+                "required" : [ "file" ]
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "201" : {
+            "description" : "재인코딩 완료 메타데이터",
+            "headers" : {
+              "Location" : {
+                "description" : "/api/files/{fileId}/content",
+                "style" : "simple",
+                "schema" : {
+                  "type" : "string"
+                }
+              }
+            },
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseFileInfo"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "413" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "415" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "429" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "cookieAuth" : [ ],
+          "csrfHeader" : [ ]
+        } ]
+      }
+    },
+    "/api/auth/refresh" : {
+      "post" : {
+        "tags" : [ "auth-controller" ],
+        "summary" : "단회 갱신 자격 회전",
+        "description" : "Origin/CSRF 필수. 사용한 hash 재사용은 해당 sid 폐기 및 401 TOKEN_REFRESH_REUSED. 응답 유실 시 재로그인. 503 발급 실패는 부분 자격을 폐기합니다.",
+        "operationId" : "refresh",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseRefreshView"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "413" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "415" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "429" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "csrfHeader" : [ ]
+        } ]
+      }
+    },
+    "/api/auth/logout" : {
+      "post" : {
+        "tags" : [ "auth-controller" ],
+        "summary" : "현재 로그인 폐기",
+        "description" : "Origin/CSRF 필수. 만료 access가 앞에서 거부되지 않습니다. 폐기는 이력 실패에도 유지되며 이력 장애는 503입니다.",
+        "operationId" : "logout",
+        "responses" : {
+          "400" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "413" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "415" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "429" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "204" : {
+            "description" : "본문 없음"
+          }
+        },
+        "security" : [ {
+          "csrfHeader" : [ ]
+        } ]
+      }
+    },
+    "/api/auth/logout-all" : {
+      "post" : {
+        "tags" : [ "auth-controller" ],
+        "summary" : "본인 전체 로그인 폐기",
+        "description" : "유효 access, Origin/CSRF 필요. 모든 서버에서 다음 요청부터 거부합니다.",
+        "operationId" : "logoutAll",
+        "responses" : {
+          "400" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "413" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "415" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "429" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "204" : {
+            "description" : "본문 없음"
+          }
+        },
+        "security" : [ {
+          "cookieAuth" : [ ],
+          "csrfHeader" : [ ]
+        } ]
+      }
+    },
+    "/api/auth/login" : {
+      "post" : {
+        "tags" : [ "auth-controller" ],
+        "summary" : "자체 비밀번호 로그인",
+        "description" : "Origin/CSRF 필수. 401 LOGIN_FAILED, 409 CONCURRENT_LOGIN_DENIED, 429 RATE_LIMITED, 503 저장소/이력 장애. JWT/refresh는 HttpOnly Set-Cookie 전용입니다.",
+        "operationId" : "login",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/Login"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseLoginView"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "413" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "415" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "429" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "csrfHeader" : [ ]
+        } ]
+      }
+    },
+    "/api/auth/me" : {
+      "get" : {
+        "tags" : [ "auth-controller" ],
+        "summary" : "현재 인증 사용자",
+        "description" : "유효 access와 공유 sid 필요. 활동을 연장하므로 상태 폴링으로 사용하지 않습니다.",
+        "operationId" : "getCurrentUser",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseCurrentUser"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "413" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "415" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "429" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "cookieAuth" : [ ]
+        } ]
+      },
+      "head" : {
+        "tags" : [ "auth-controller" ],
+        "summary" : "활동 연장 없는 인증 상태 확인",
+        "operationId" : "headCurrentUser",
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "400" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "413" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "415" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "429" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "cookieAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/users" : {
+      "get" : {
+        "tags" : [ "user-controller" ],
+        "summary" : "사용자 목록",
+        "description" : "USER_READ, REQUIRED 감사. q 최대100, size 최대100, 503 감사 장애 시 본문을 반환하지 않습니다.",
+        "operationId" : "searchUsers",
+        "parameters" : [ {
+          "name" : "q",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 20
+          }
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "default" : "idAsc",
+            "enum" : [ "idAsc", "nameAsc", "nameDesc" ]
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponsePageDataSummary"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "413" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "415" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "429" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "cookieAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/users/{userId}" : {
+      "get" : {
+        "tags" : [ "user-controller" ],
+        "summary" : "사용자 상세",
+        "description" : "USER_READ와 PERSONAL_INFO_READ, REQUIRED 감사. 404 대상 없음, 403 권한 부족, 503 이력 실패.",
+        "operationId" : "getUser",
+        "parameters" : [ {
+          "name" : "userId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseProfile"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "413" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "415" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "429" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "cookieAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/users/me" : {
+      "get" : {
+        "tags" : [ "user-controller" ],
+        "summary" : "본인 기본 프로필",
+        "description" : "USER_READ_SELF 필요. 다른 actorId 입력을 받지 않습니다.",
+        "operationId" : "getMyProfile",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseProfile"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "413" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "415" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "429" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "cookieAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/files/{fileId}/content" : {
+      "get" : {
+        "tags" : [ "file-controller" ],
+        "summary" : "본인 이미지 다운로드",
+        "description" : "소유자만 접근. attachment·UTF-8 filename·nosniff·no-store. 서버 경로는 반환하지 않음. 다른 소유자/없는 파일404.",
+        "operationId" : "downloadFile",
+        "parameters" : [ {
+          "name" : "fileId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "재인코딩된 이미지 바이트",
+            "headers" : {
+              "Cache-Control" : {
+                "style" : "simple",
+                "schema" : {
+                  "type" : "string",
+                  "enum" : [ "no-store" ]
+                }
+              },
+              "X-Content-Type-Options" : {
+                "style" : "simple",
+                "schema" : {
+                  "type" : "string",
+                  "enum" : [ "nosniff" ]
+                }
+              },
+              "Content-Disposition" : {
+                "description" : "attachment, UTF-8 filename",
+                "style" : "simple",
+                "schema" : {
+                  "type" : "string"
+                }
+              },
+              "Content-Length" : {
+                "style" : "simple",
+                "schema" : {
+                  "type" : "integer",
+                  "maximum" : 5242880
+                }
+              }
+            },
+            "content" : {
+              "image/png" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "binary"
+                }
+              },
+              "image/jpeg" : {
+                "schema" : {
+                  "type" : "string",
+                  "format" : "binary"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "413" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "415" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "429" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "cookieAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/departments" : {
+      "get" : {
+        "tags" : [ "department-controller" ],
+        "summary" : "부서 목록",
+        "description" : "DEPARTMENT_READ 필요. q 최대100, page 0 기반, size 1~100, BEST_EFFORT 접근 이력.",
+        "operationId" : "searchDepartments",
+        "parameters" : [ {
+          "name" : "q",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 20
+          }
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string",
+            "default" : "idAsc",
+            "enum" : [ "idAsc", "nameAsc", "nameDesc" ]
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponsePageDataDepartmentSummary"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "413" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "415" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "429" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "cookieAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/auth/csrf" : {
+      "get" : {
+        "tags" : [ "auth-controller" ],
+        "summary" : "미인증 CSRF 토큰 조회",
+        "description" : "IP 한도 적용. no-store. X-CSRF-TOKEN으로 제출하며 HttpOnly 쿠키 원문을 읽지 않습니다.",
+        "operationId" : "getCsrf",
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponseCsrfView"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "413" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "415" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "429" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ ]
+      }
+    },
+    "/api/audits/security" : {
+      "get" : {
+        "tags" : [ "audit-controller" ],
+        "summary" : "보안 이력 조회",
+        "description" : "SECURITY_AUDIT_READ, REQUIRED 자기 조회 이력. UTC 밀리초 기간 최대31일. login reference·IP·UA는 제외합니다.",
+        "operationId" : "searchSecurityAudits",
+        "parameters" : [ {
+          "name" : "from",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "to",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 20
+          }
+        }, {
+          "name" : "eventCode",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "targetUserId",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponsePageDataSecurity"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "413" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "415" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "429" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "cookieAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/audits/access" : {
+      "get" : {
+        "tags" : [ "audit-controller" ],
+        "summary" : "접근 이력 조회",
+        "description" : "AUDIT_READ, REQUIRED 자기 조회 이력. UTC 밀리초 from 포함/to 미포함, 최대31일, size 최대100.",
+        "operationId" : "searchAccessAudits",
+        "parameters" : [ {
+          "name" : "from",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "to",
+          "in" : "query",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "page",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 0
+          }
+        }, {
+          "name" : "size",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "integer",
+            "format" : "int32",
+            "default" : 20
+          }
+        }, {
+          "name" : "actorId",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "resourceCode",
+          "in" : "query",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiResponsePageDataAccess"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "413" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "415" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "429" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "cookieAuth" : [ ]
+        } ]
+      }
+    },
+    "/api/files/{fileId}" : {
+      "delete" : {
+        "tags" : [ "file-controller" ],
+        "summary" : "본인 파일 삭제",
+        "description" : "성공204. 다른 소유자/없음404. 실패503에서는 삭제 완료로 표시하지 않고 DELETING을 재시도할 수 있음.",
+        "operationId" : "deleteFile",
+        "parameters" : [ {
+          "name" : "fileId",
+          "in" : "path",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "본문 없음"
+          },
+          "400" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "409" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "413" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "415" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "429" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "500" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          },
+          "503" : {
+            "description" : "공통 오류 code·traceId; 원문 예외/개인정보 미포함",
+            "content" : {
+              "application/problem+json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ApiProblem"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ {
+          "cookieAuth" : [ ],
+          "csrfHeader" : [ ]
+        } ]
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Password" : {
+        "type" : "object",
+        "properties" : {
+          "currentPassword" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 1,
+            "writeOnly" : true
+          },
+          "newPassword" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 15,
+            "writeOnly" : true
+          }
+        },
+        "required" : [ "currentPassword", "newPassword" ]
+      },
+      "ApiResponseFileInfo" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "$ref" : "#/components/schemas/FileInfo"
+          },
+          "traceId" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "data", "traceId" ]
+      },
+      "FileInfo" : {
+        "type" : "object",
+        "properties" : {
+          "fileId" : {
+            "type" : "string",
+            "format" : "uuid"
+          },
+          "originalName" : {
+            "type" : "string",
+            "maxLength" : 120
+          },
+          "contentType" : {
+            "type" : "string",
+            "enum" : [ "image/png", "image/jpeg" ]
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int64",
+            "description" : "재인코딩 후 저장된 바이트 수",
+            "maximum" : 5242880,
+            "minimum" : 1
+          },
+          "width" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 8192,
+            "minimum" : 1
+          },
+          "height" : {
+            "type" : "integer",
+            "format" : "int32",
+            "maximum" : 8192,
+            "minimum" : 1
+          },
+          "createdAt" : {
+            "type" : "string",
+            "description" : "UTC 시각, uuuu-MM-dd HH:mm:ss.SSS. offset/Z 없음",
+            "pattern" : "^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}$"
+          }
+        },
+        "required" : [ "contentType", "createdAt", "fileId", "height", "originalName", "size", "width" ]
+      },
+      "ApiResponseRefreshView" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "$ref" : "#/components/schemas/RefreshView"
+          },
+          "traceId" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "data", "traceId" ]
+      },
+      "RefreshView" : {
+        "type" : "object",
+        "properties" : {
+          "accessExpiresAt" : {
+            "type" : "string",
+            "description" : "UTC 시각, uuuu-MM-dd HH:mm:ss.SSS. offset/Z 없음",
+            "pattern" : "^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}$"
+          },
+          "absoluteExpiresAt" : {
+            "type" : "string",
+            "description" : "UTC 시각, uuuu-MM-dd HH:mm:ss.SSS. offset/Z 없음",
+            "pattern" : "^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}$"
+          }
+        },
+        "required" : [ "absoluteExpiresAt", "accessExpiresAt" ]
+      },
+      "Login" : {
+        "type" : "object",
+        "properties" : {
+          "loginId" : {
+            "type" : "string",
+            "minLength" : 1,
+            "pattern" : "[a-z0-9][a-z0-9._-]{2,49}"
+          },
+          "password" : {
+            "type" : "string",
+            "maxLength" : 128,
+            "minLength" : 1,
+            "writeOnly" : true
+          }
+        },
+        "required" : [ "loginId", "password" ]
+      },
+      "ApiResponseLoginView" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "$ref" : "#/components/schemas/LoginView"
+          },
+          "traceId" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "data", "traceId" ]
+      },
+      "CurrentUser" : {
+        "type" : "object",
+        "properties" : {
+          "userId" : {
+            "type" : "string",
+            "pattern" : "^[1-9][0-9]{0,18}$"
+          },
+          "loginId" : {
+            "type" : "string"
+          },
+          "displayName" : {
+            "type" : "string"
+          },
+          "departments" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Membership"
+            }
+          },
+          "roles" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          },
+          "permissions" : {
+            "type" : "array",
+            "items" : {
+              "type" : "string"
+            }
+          }
+        },
+        "required" : [ "departments", "displayName", "loginId", "permissions", "roles", "userId" ]
+      },
+      "LoginView" : {
+        "type" : "object",
+        "properties" : {
+          "user" : {
+            "$ref" : "#/components/schemas/CurrentUser"
+          },
+          "accessExpiresAt" : {
+            "type" : "string",
+            "description" : "UTC 시각, uuuu-MM-dd HH:mm:ss.SSS. offset/Z 없음",
+            "pattern" : "^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}$"
+          }
+        },
+        "required" : [ "accessExpiresAt", "user" ]
+      },
+      "Membership" : {
+        "type" : "object",
+        "properties" : {
+          "departmentId" : {
+            "type" : "string",
+            "pattern" : "^[1-9][0-9]{0,18}$"
+          },
+          "departmentName" : {
+            "type" : "string"
+          },
+          "primary" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "departmentId", "departmentName", "primary" ]
+      },
+      "ApiResponsePageDataSummary" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "$ref" : "#/components/schemas/PageDataSummary"
+          },
+          "traceId" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "data", "traceId" ]
+      },
+      "Department" : {
+        "type" : "object",
+        "properties" : {
+          "departmentId" : {
+            "type" : "string",
+            "pattern" : "^[1-9][0-9]{0,18}$"
+          },
+          "departmentName" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "departmentId", "departmentName" ]
+      },
+      "PageDataSummary" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Summary"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalElements" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "items", "page", "size", "totalElements", "totalPages" ]
+      },
+      "Summary" : {
+        "type" : "object",
+        "properties" : {
+          "userId" : {
+            "type" : "string",
+            "pattern" : "^[1-9][0-9]{0,18}$"
+          },
+          "displayName" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "departments" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Department"
+            }
+          }
+        },
+        "required" : [ "departments", "displayName", "status", "userId" ]
+      },
+      "ApiResponseProfile" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "$ref" : "#/components/schemas/Profile"
+          },
+          "traceId" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "data", "traceId" ]
+      },
+      "Profile" : {
+        "type" : "object",
+        "properties" : {
+          "userId" : {
+            "type" : "string",
+            "pattern" : "^[1-9][0-9]{0,18}$"
+          },
+          "displayName" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "string"
+          },
+          "departments" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Department"
+            }
+          },
+          "loginId" : {
+            "type" : "string"
+          },
+          "email" : {
+            "type" : [ "string", "null" ]
+          },
+          "createdAt" : {
+            "type" : "string",
+            "description" : "UTC 시각, uuuu-MM-dd HH:mm:ss.SSS. offset/Z 없음",
+            "pattern" : "^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}$"
+          },
+          "updatedAt" : {
+            "type" : "string",
+            "description" : "UTC 시각, uuuu-MM-dd HH:mm:ss.SSS. offset/Z 없음",
+            "pattern" : "^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}$"
+          }
+        },
+        "required" : [ "createdAt", "departments", "displayName", "email", "loginId", "status", "updatedAt", "userId" ]
+      },
+      "ApiResponsePageDataFileInfo" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "$ref" : "#/components/schemas/PageDataFileInfo"
+          },
+          "traceId" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "data", "traceId" ]
+      },
+      "PageDataFileInfo" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/FileInfo"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalElements" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "items", "page", "size", "totalElements", "totalPages" ]
+      },
+      "ApiResponsePageDataDepartmentSummary" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "$ref" : "#/components/schemas/PageDataDepartmentSummary"
+          },
+          "traceId" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "data", "traceId" ]
+      },
+      "DepartmentSummary" : {
+        "type" : "object",
+        "properties" : {
+          "departmentId" : {
+            "type" : "string",
+            "pattern" : "^[1-9][0-9]{0,18}$"
+          },
+          "departmentCode" : {
+            "type" : "string"
+          },
+          "departmentName" : {
+            "type" : "string"
+          },
+          "parentId" : {
+            "type" : [ "string", "null" ],
+            "pattern" : "^[1-9][0-9]{0,18}$"
+          },
+          "sortOrder" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "active" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "active", "departmentCode", "departmentId", "departmentName", "parentId", "sortOrder" ]
+      },
+      "PageDataDepartmentSummary" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/DepartmentSummary"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalElements" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "items", "page", "size", "totalElements", "totalPages" ]
+      },
+      "ApiResponseCurrentUser" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "$ref" : "#/components/schemas/CurrentUser"
+          },
+          "traceId" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "data", "traceId" ]
+      },
+      "ApiResponseCsrfView" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "$ref" : "#/components/schemas/CsrfView"
+          },
+          "traceId" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "data", "traceId" ]
+      },
+      "CsrfView" : {
+        "type" : "object",
+        "properties" : {
+          "token" : {
+            "type" : "string"
+          },
+          "headerName" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "headerName", "token" ]
+      },
+      "ApiResponsePageDataSecurity" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "$ref" : "#/components/schemas/PageDataSecurity"
+          },
+          "traceId" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "data", "traceId" ]
+      },
+      "PageDataSecurity" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Security"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalElements" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "items", "page", "size", "totalElements", "totalPages" ]
+      },
+      "Security" : {
+        "type" : "object",
+        "properties" : {
+          "eventId" : {
+            "type" : "string"
+          },
+          "occurredAt" : {
+            "type" : "string",
+            "description" : "UTC 시각, uuuu-MM-dd HH:mm:ss.SSS. offset/Z 없음",
+            "pattern" : "^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}$"
+          },
+          "eventCode" : {
+            "type" : "string"
+          },
+          "actorUserId" : {
+            "type" : [ "string", "null" ],
+            "pattern" : "^[1-9][0-9]{0,18}$"
+          },
+          "targetUserId" : {
+            "type" : [ "string", "null" ],
+            "pattern" : "^[1-9][0-9]{0,18}$"
+          },
+          "outcome" : {
+            "type" : "string"
+          },
+          "reasonCode" : {
+            "type" : [ "string", "null" ]
+          },
+          "traceId" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "actorUserId", "eventCode", "eventId", "occurredAt", "outcome", "reasonCode", "targetUserId", "traceId" ]
+      },
+      "Access" : {
+        "type" : "object",
+        "properties" : {
+          "auditId" : {
+            "type" : "string"
+          },
+          "occurredAt" : {
+            "type" : "string",
+            "description" : "UTC 시각, uuuu-MM-dd HH:mm:ss.SSS. offset/Z 없음",
+            "pattern" : "^[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}$"
+          },
+          "actorUserId" : {
+            "type" : [ "string", "null" ],
+            "pattern" : "^[1-9][0-9]{0,18}$"
+          },
+          "resourceCode" : {
+            "type" : "string"
+          },
+          "actionCode" : {
+            "type" : "string"
+          },
+          "targetType" : {
+            "type" : [ "string", "null" ]
+          },
+          "targetId" : {
+            "type" : [ "string", "null" ]
+          },
+          "outcome" : {
+            "type" : "string"
+          },
+          "reasonCode" : {
+            "type" : [ "string", "null" ]
+          },
+          "traceId" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "actionCode", "actorUserId", "auditId", "occurredAt", "outcome", "reasonCode", "resourceCode", "targetId", "targetType", "traceId" ]
+      },
+      "ApiResponsePageDataAccess" : {
+        "type" : "object",
+        "properties" : {
+          "data" : {
+            "$ref" : "#/components/schemas/PageDataAccess"
+          },
+          "traceId" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "data", "traceId" ]
+      },
+      "PageDataAccess" : {
+        "type" : "object",
+        "properties" : {
+          "items" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/Access"
+            }
+          },
+          "page" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "size" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "totalElements" : {
+            "type" : "integer",
+            "format" : "int64"
+          },
+          "totalPages" : {
+            "type" : "integer",
+            "format" : "int64"
+          }
+        },
+        "required" : [ "items", "page", "size", "totalElements", "totalPages" ]
+      },
+      "ApiProblem" : {
+        "properties" : {
+          "type" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "status" : {
+            "type" : "integer",
+            "format" : "int32"
+          },
+          "code" : {
+            "type" : "string"
+          },
+          "traceId" : {
+            "type" : "string"
+          },
+          "fieldErrors" : {
+            "type" : "array",
+            "items" : {
+              "$ref" : "#/components/schemas/FieldError"
+            }
+          }
+        },
+        "required" : [ "code", "status", "title", "traceId", "type" ]
+      },
+      "FieldError" : {
+        "properties" : {
+          "field" : {
+            "type" : "string"
+          },
+          "code" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "code", "field" ]
+      }
+    },
+    "securitySchemes" : {
+      "cookieAuth" : {
+        "type" : "apiKey",
+        "name" : "local-access",
+        "in" : "cookie"
+      },
+      "csrfHeader" : {
+        "type" : "apiKey",
+        "name" : "X-CSRF-TOKEN",
+        "in" : "header"
+      }
+    }
+  }
+}

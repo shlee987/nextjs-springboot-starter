@@ -1,5 +1,7 @@
 # 프론트엔드 구현 기준
 
+> 2026-10-29: 갱신 가능한 TOKEN_EXPIRED는 제한된 단일 갱신 후 처리하며, 폐기401·refresh401은 재로그인한다. 기존 401 즉시정리 문구보다 [프론트 인증 연결 계약](../backend-handoff.md)이 우선한다. 세션 CSRF가 아닌 쿠키 저장소+메모리 표현을 사용하며 일반 API는 HttpSession을 만들지 않는다.
+
 ## FE01 — 서버·브라우저 경계
 
 - Next 서버 전용 설정·Spring 내부 URL·인증 관련 로직은 server-only 모듈에 둔다. 프론트에서 DB 접근·업무 권한 판정을 구현하지 않는다.
@@ -22,7 +24,7 @@ React 기본 escaping을 유지한다. dangerouslySetInnerHTML·직접 innerHTML
 ## FE03 — API 요청·세션·상태
 
 - 공통 요청 경계 하나에서 API 기본 경로, credentials, CSRF, 타임아웃, 취소, 안전한 오류 변환을 관리한다. 브라우저 기본안은 같은 출처 /api이다.
-- 인증 증명은 HttpOnly 세션 쿠키 기본안. access/refresh token을 localStorage·sessionStorage·URL·상태 영속화·분석 도구에 저장하지 않는다.
+- 인증 증명은 HttpOnly Access JWT/Refresh 쿠키이며 API에서 HttpSession 인증은 사용하지 않는다. access/refresh token을 localStorage·sessionStorage·URL·상태 영속화·분석 도구에 저장하지 않는다.
 - CSRF 토큰은 인증 증명이 아니며 해당 탭 메모리에서만 관리하는 기본안이다. 로그인·로그아웃 후 새로 발급받는다. 세션 프로필 상세는 backend.md.
 - 조회 로딩·빈 값·실패를 분리하고 401이면 보호 데이터를 비운 뒤 로그인 경로로 이동한다. 403을 빈 결과나 성공으로 바꾸지 않는다.
 - 403을 자동 재로그인·무한 재시도로 숨기지 않는다. CSRF 재발급은 명시된 오류코드·횟수 제한으로만 하고 변경 요청의 자동 재전송은 기본 금지한다.

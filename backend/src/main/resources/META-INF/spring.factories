@@ -1,2 +1,6 @@
 org.springframework.boot.EnvironmentPostProcessor=\
-com.example.starter.config.EnvironmentGuard
+com.example.starter.common.config.EnvironmentGuard,\
+com.example.starter.common.config.LogDirectoryGuard
+
+org.springframework.context.ApplicationListener=\
+com.example.starter.common.config.LocalLifecycleLogging

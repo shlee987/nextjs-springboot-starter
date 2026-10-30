@@ -1,5 +1,7 @@
 # 확정 기술 구성과 버전 기준
 
+> 2026-10-29 범위 갱신: 기존 설치 버전은 유지한다. 후속 JWT resource-server/JOSE·Spring Session JDBC·Argon2 provider 의존성은 기존 Boot BOM 관리로 추가할 계획이며 아직 설치/lock/실행 검증하지 않았다. local SQL은 별도 외부 로깅 제품 없이 MyBatis 전용 interceptor로 설계했다. 정확 선택과 정책은 [최종 설계](backend-foundation.md), 최초 버전 조사 기록은 아래와 같다.
+
 기준일: 2026-10-26 (Asia/Seoul) / 상태: 구성·버전 선정 및 1차 기본 설치·빌드·로컬 기초 연동 검증 완료. 세부 증거와 후속 범위는 change-history.md 및 모듈 README 참조.
 
 사용자가 DB 제품과 호환 가능한 최신 안정 버전 선정을 설계자에게 위임한 결정 기록이다. 이 문서의 기본 조합을 채택한다. [기술별 역할과 통합 원칙](technology-stack.md), [상황별 대체 조합](stack-alternatives.md)을 함께 참조한다. 예제 기능·공통 컨트롤 상세·배포별 실행 설정은 후속 설계다.
@@ -17,7 +19,7 @@
 | UI 기반 | Radix Primitives + 일반 CSS·CSS Modules·CSS 변수 | 동작·접근성 기반을 활용하고 프로젝트 디자인 직접 적용 |
 | 그리드·차트 | AG Grid Community + Apache ECharts | 재사용할 공통 그리드·차트 기반. Enterprise 미포함 |
 | Java API | OpenJDK 25 LTS + Spring Boot + Spring MVC | Java 최신 LTS와 Servlet 기반 REST API |
-| 인증 기반 | Spring Security + Spring Session Data Redis | 쿠키·CSRF·권한·Redis 공유 세션. 인증 수단 추가 시 기반 유지 |
+| 인증 기반 | Spring Security JWT/JOSE + Redis(default)/JDBC 인증 상태 + 조건부 Spring Session | JWT 쿠키/CSRF·권한·토큰 폐기·외부 인증 진행 상태를 분리. 최종 인증 설계 적용 |
 | 데이터 접근 | MyBatis + Spring JDBC + HikariCP | SQL을 직접 관리하고 서비스 어노테이션으로 트랜잭션 경계 설정 |
 | DB·스키마 | PostgreSQL + Flyway | 로컬 준비가 쉬운 RDB와 버전별 테이블 생성·변경 SQL |
 | 서버 입력·코드 보조 | Bean Validation + Lombok | 서버 입력 검증과 생성자·접근자 반복 코드 감소 |

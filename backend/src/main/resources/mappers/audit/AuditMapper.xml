@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.starter.audit.mapper.AuditMapper">
+    <!-- 이력은 append-only이며 원문 요청·검색어·응답 데이터를 저장하지 않는다. -->
+    <insert id="insertAccess">
+        INSERT INTO "ACCESS_AUDIT" ("AUDIT_ID", "OCCURRED_AT", "ACTOR_USER_ID", "ACTOR_KIND"
+            , "RESOURCE_CODE", "ACTION_CODE", "TARGET_TYPE", "TARGET_ID", "OUTCOME", "REASON_CODE"
+            , "TRACE_ID", "SERVER_ID", "OPERATION_ID", "CLIENT_IP")
+        VALUES (#{id}::uuid, #{occurredAt}, #{actorUserId,jdbcType=BIGINT}, #{actorKind}
+            , #{resourceCode}, #{actionCode}, #{targetType,jdbcType=VARCHAR}, #{targetId,jdbcType=VARCHAR}
+            , #{outcome}, #{reasonCode,jdbcType=VARCHAR}, #{traceId}::uuid, #{serverId}, #{operationId,jdbcType=VARCHAR}::uuid, #{clientIp,jdbcType=VARCHAR}::inet)
+    </insert>
+    <!-- 보안 이벤트 한 행을 append한다. -->
+    <insert id="insertSecurity">
+        INSERT INTO "SECURITY_AUDIT" ("EVENT_ID", "OCCURRED_AT", "EVENT_CODE", "ACTOR_USER_ID"
+            , "TARGET_USER_ID", "OUTCOME", "REASON_CODE", "TRACE_ID", "SERVER_ID", "LOGIN_REFERENCE", "CLIENT_IP")
+        VALUES (#{id}::uuid, #{occurredAt}, #{eventCode}, #{actorUserId,jdbcType=BIGINT}
+            , #{targetUserId,jdbcType=BIGINT}, #{outcome}, #{reasonCode,jdbcType=VARCHAR}, #{traceId}::uuid, #{serverId}, #{loginReference,jdbcType=VARCHAR}, #{clientIp,jdbcType=VARCHAR}::inet)
+    </insert>
+    <sql id="accessCondition">
+        WHERE "OCCURRED_AT" &gt;= #{from} AND "OCCURRED_AT" &lt; #{to}
+        <if test="actorId != null">AND "ACTOR_USER_ID" = #{actorId}</if>
+        <if test="resourceCode != null">AND "RESOURCE_CODE" = #{resourceCode}</if>
+    </sql>
+    <!-- 조회 자체의 감사는 상위 서비스 advice가 한 번 기록한다. -->
+    <select id="selectAccessList" resultType="com.example.starter.audit.model.AuditViews$Access">
+        SELECT "AUDIT_ID"::text AS "AUDIT_ID", "OCCURRED_AT", "ACTOR_USER_ID"::text AS "ACTOR_USER_ID"
+            , "RESOURCE_CODE", "ACTION_CODE", "TARGET_TYPE", "TARGET_ID", "OUTCOME", "REASON_CODE", "TRACE_ID"::text AS "TRACE_ID"
+        FROM "ACCESS_AUDIT" <include refid="accessCondition"/>
+        ORDER BY "OCCURRED_AT" DESC, "AUDIT_ID" DESC LIMIT #{page.size} OFFSET #{page.offset}
+    </select>
+    <!-- 접근 목록과 동일 조건 건수다. -->
+    <select id="selectAccessCount" resultType="long">
+        SELECT count(*) FROM "ACCESS_AUDIT" <include refid="accessCondition"/>
+    </select>
+    <sql id="securityCondition">
+        WHERE "OCCURRED_AT" &gt;= #{from} AND "OCCURRED_AT" &lt; #{to}
+        <if test="eventCode != null">AND "EVENT_CODE" = #{eventCode}</if>
+        <if test="targetUserId != null">AND "TARGET_USER_ID" = #{targetUserId}</if>
+    </sql>
+    <!-- 보안 이력 공개 필드만 읽는다. -->
+    <select id="selectSecurityList" resultType="com.example.starter.audit.model.AuditViews$Security">
+        SELECT "EVENT_ID"::text AS "EVENT_ID", "OCCURRED_AT", "EVENT_CODE", "ACTOR_USER_ID"::text AS "ACTOR_USER_ID"
+            , "TARGET_USER_ID"::text AS "TARGET_USER_ID", "OUTCOME", "REASON_CODE", "TRACE_ID"::text AS "TRACE_ID"
+        FROM "SECURITY_AUDIT" <include refid="securityCondition"/>
+        ORDER BY "OCCURRED_AT" DESC, "EVENT_ID" DESC LIMIT #{page.size} OFFSET #{page.offset}
+    </select>
+    <!-- 보안 목록과 동일 조건 건수다. -->
+    <select id="selectSecurityCount" resultType="long">
+        SELECT count(*) FROM "SECURITY_AUDIT" <include refid="securityCondition"/>
+    </select>
+</mapper>

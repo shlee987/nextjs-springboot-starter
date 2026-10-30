@@ -1,6 +1,10 @@
 # 구현 설계 안내
 
-문서 버전: 0.5 / 최초 작성: 2026-10-22 / 구성·버전 확인: 2026-10-26 / 상태: 1차 기반 구현·독립 리뷰·로컬 기초 연동 검증 완료. 개별 업무·인증·UI와 실제 배포 검증은 후속.
+> 2026-10-29: [백엔드 공통 기반 최종 설계](backend-foundation.md)를 확정했다. [인증](authentication-foundation.md) · [DB](backend-data-model.md) · [로그/이력](backend-observability.md) · [API 인계/검증](backend-handoff.md)을 함께 읽는다. 공통 기반 구현·독립 리뷰·수정 재검토와 최종 연결 경계 검토를 마쳤다. 승인된 로컬 저장소·브라우저 실연동 검증도 마쳤다. 수동·도구 제한과 운영 검증 잔여는 [현재 현황](foundation-status.md)에 구분한다. 전체 항목 검증 완료는 아니다. 현재 증거는 [백엔드 검증표](../../backend/VERIFICATION.md)와 [프론트 기능표](../../frontend/FEATURES.md)가 소유한다. 아래 1차 상태는 과거 실행 이력으로 구분한다.
+
+문서 버전: 1.1 / 최초 작성: 2026-10-22 / 상태 갱신: 2026-10-30. 공통 기반과 후속 UI·로그·공격 대응·이미지 파일 기능을 구현하고 승인된 실제 연결을 확인했다. 최신 검증 범위와 네이티브 도구·운영 환경의 남은 확인은 현재 현황과 모듈 검증표를 따른다.
+
+> 전체 UI 정리: [PC·모바일 반응형·공통 컨트롤·예제 설명 개선 설계](frontend-ui-refinement.md). 이전 기능 검증과 별도로 구현·시각 검수를 진행한다.
 
 ## 목적과 사용법
 
@@ -59,10 +63,19 @@
 
 ## 인증 기반과 환경 독립성
 
-- [인증 확장·Redis 공유 세션 기반](authentication-foundation.md)
+- [JWT·Redis/JDBC·Spring Session 공존 기반](authentication-foundation.md)
 - Docker는 로컬 DB/Redis 준비 도구이며, 다른 환경의 제품 실행·migration은 Docker 없이 가능하도록 설계한다.
 
 ## 현재 프로젝트의 데이터 접근 계약
 
 - [MyBatis 역할·트랜잭션·연결·임시 테이블·검증](persistence.md)
 - docs/common-rules는 모든 프로젝트의 범용 룰, 이 폴더는 현재 프로젝트의 공통 선택과 상세 계약을 관리한다. 특정 스택의 선택을 범용 룰에 반영하지 않는다.
+
+## 프론트 공통 기능·예제 카탈로그 설계
+
+[프론트 최종 설계와 라이브러리·컨트롤·예제 누락 방지표](frontend-foundation.md)를 적용한다. 기본 설치된 라이브러리마다 실제 사용과 검증을 연결하며, 문서 작성은 기능 구현 완료가 아니다.
+
+
+## 2026-10-30 후속 작업 안내
+
+[공통 컨트롤 보완](ui-component-review.md)·[문구와 로그](readability-and-local-logs.md)·[공격 대응과 파일 업로드](attack-defense-and-files.md)를 추가 적용한다. 현재 완료/실행/리뷰 상태는 [현재 현황](foundation-status.md), 실제 증거는 모듈별 검증표를 확인한다. 문서의 과거 설치·설계 상태를 최신 구현 상태로 해석하지 않는다.

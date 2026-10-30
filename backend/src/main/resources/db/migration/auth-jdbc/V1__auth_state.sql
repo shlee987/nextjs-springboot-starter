@@ -1,0 +1,131 @@
+-- JDBC 토큰 상태. guard는 자동 정리하지 않으며 사용자 삭제와 독립한다.
+CREATE TABLE "AUTH_USER_GUARD" (
+    "USER_ID" bigint
+       
+       
+        CONSTRAINT "NN_AUTH_USER_GUARD_USER_ID" NOT NULL
+       
+       
+        CONSTRAINT "PK_AUTH_USER_GUARD" PRIMARY KEY
+    , "BLOCKED" boolean
+       
+       
+        CONSTRAINT "NN_AUTH_USER_GUARD_BLOCKED" NOT NULL DEFAULT false
+    , "OPERATION_ID" uuid
+    , "UPDATED_AT" timestamptz(3)
+       
+       
+        CONSTRAINT "NN_AUTH_USER_GUARD_UPDATED_AT" NOT NULL
+);
+CREATE TABLE "AUTH_LOGIN" (
+    "LOGIN_ID" uuid
+       
+       
+        CONSTRAINT "NN_AUTH_LOGIN_LOGIN_ID" NOT NULL
+       
+       
+        CONSTRAINT "PK_AUTH_LOGIN" PRIMARY KEY
+    , "USER_ID" bigint
+       
+       
+        CONSTRAINT "NN_AUTH_LOGIN_USER_ID" NOT NULL
+    , "CREATED_AT" timestamptz(3)
+       
+       
+        CONSTRAINT "NN_AUTH_LOGIN_CREATED_AT" NOT NULL
+    , "AUTHENTICATED_AT" timestamptz(3)
+       
+       
+        CONSTRAINT "NN_AUTH_LOGIN_AUTHENTICATED_AT" NOT NULL
+    , "LAST_ACTIVITY_AT" timestamptz(3)
+       
+       
+        CONSTRAINT "NN_AUTH_LOGIN_LAST_ACTIVITY_AT" NOT NULL
+    , "IDLE_EXPIRES_AT" timestamptz(3)
+       
+       
+        CONSTRAINT "NN_AUTH_LOGIN_IDLE_EXPIRES_AT" NOT NULL
+    , "ABSOLUTE_EXPIRES_AT" timestamptz(3)
+       
+       
+        CONSTRAINT "NN_AUTH_LOGIN_ABSOLUTE_EXPIRES_AT" NOT NULL
+    , "REVOKED_AT" timestamptz(3)
+    , "REVOKE_REASON" varchar(64)
+    , "CURRENT_REFRESH_HASH" char(64)
+       
+       
+        CONSTRAINT "NN_AUTH_LOGIN_CURRENT_REFRESH_HASH" NOT NULL
+       
+       
+        CONSTRAINT "UX_AUTH_LOGIN_CURRENT_REFRESH_HASH" UNIQUE
+    , "PERMISSIONS_JSON" jsonb
+       
+       
+        CONSTRAINT "NN_AUTH_LOGIN_PERMISSIONS_JSON" NOT NULL
+       
+       
+        CONSTRAINT "CK_AUTH_LOGIN_PERMISSIONS_JSON"
+        CHECK (jsonb_typeof("PERMISSIONS_JSON") = 'array'
+        AND NOT jsonb_path_exists("PERMISSIONS_JSON", '$[*] ? (@.type() != "string")'))
+);
+CREATE TABLE "AUTH_REFRESH_HISTORY" (
+    "TOKEN_HASH" char(64)
+       
+       
+        CONSTRAINT "NN_AUTH_REFRESH_HISTORY_TOKEN_HASH" NOT NULL
+       
+       
+        CONSTRAINT "PK_AUTH_REFRESH_HISTORY" PRIMARY KEY
+    , "LOGIN_ID" uuid
+       
+       
+        CONSTRAINT "NN_AUTH_REFRESH_HISTORY_LOGIN_ID" NOT NULL
+       
+       
+        CONSTRAINT "FK_AUTH_REFRESH_HISTORY_LOGIN_ID"
+        REFERENCES "AUTH_LOGIN" ("LOGIN_ID") ON DELETE CASCADE
+    , "USED_AT" timestamptz(3)
+       
+       
+        CONSTRAINT "NN_AUTH_REFRESH_HISTORY_USED_AT" NOT NULL
+    , "EXPIRES_AT" timestamptz(3)
+       
+       
+        CONSTRAINT "NN_AUTH_REFRESH_HISTORY_EXPIRES_AT" NOT NULL
+);
+CREATE TABLE "AUTH_ATTEMPT_BUCKET" (
+    "BUCKET_TYPE" varchar(16)
+       
+       
+        CONSTRAINT "NN_AUTH_ATTEMPT_BUCKET_BUCKET_TYPE" NOT NULL
+       
+       
+        CONSTRAINT "CK_AUTH_ATTEMPT_BUCKET_BUCKET_TYPE"
+        CHECK ("BUCKET_TYPE" IN ('ACCOUNT', 'IP', 'REQUEST'))
+    , "BUCKET_KEY" char(64)
+       
+       
+        CONSTRAINT "NN_AUTH_ATTEMPT_BUCKET_BUCKET_KEY" NOT NULL
+    , "WINDOW_START_AT" timestamptz(3)
+       
+       
+        CONSTRAINT "NN_AUTH_ATTEMPT_BUCKET_WINDOW_START_AT" NOT NULL
+    , "ATTEMPTS" integer
+       
+       
+        CONSTRAINT "NN_AUTH_ATTEMPT_BUCKET_ATTEMPTS" NOT NULL
+       
+       
+        CONSTRAINT "CK_AUTH_ATTEMPT_BUCKET_ATTEMPTS" CHECK ("ATTEMPTS" >= 0)
+    , "BLOCKED_UNTIL" timestamptz(3)
+    , "EXPIRES_AT" timestamptz(3)
+       
+       
+        CONSTRAINT "NN_AUTH_ATTEMPT_BUCKET_EXPIRES_AT" NOT NULL
+    , CONSTRAINT "PK_AUTH_ATTEMPT_BUCKET"
+        PRIMARY KEY ("BUCKET_TYPE", "BUCKET_KEY", "WINDOW_START_AT")
+);
+CREATE INDEX "IX_AUTH_LOGIN_USER" ON "AUTH_LOGIN" ("USER_ID", "ABSOLUTE_EXPIRES_AT");
+CREATE INDEX "IX_AUTH_LOGIN_IDLE" ON "AUTH_LOGIN" ("IDLE_EXPIRES_AT");
+CREATE INDEX "IX_AUTH_REFRESH_EXPIRY" ON "AUTH_REFRESH_HISTORY" ("EXPIRES_AT");
+CREATE INDEX "IX_AUTH_ATTEMPT_EXPIRY" ON "AUTH_ATTEMPT_BUCKET" ("EXPIRES_AT");

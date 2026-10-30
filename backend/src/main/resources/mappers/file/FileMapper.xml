@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.starter.file.mapper.FileMapper">
+    <!-- 최초 소유자 용량 행만 추가하고 기존 사용량을 보존한다. -->
+    <insert id="ensureQuota">
+        INSERT INTO "FILE_OWNER_QUOTA" ("OWNER_USER_ID", "USED_BYTES")
+        VALUES (#{ownerUserId}, 0)
+        ON CONFLICT ("OWNER_USER_ID") DO NOTHING
+    </insert>
+    <!-- 동일 소유자 행 잠금과 상한 조건으로 동시 예약을 제한한다. -->
+    <update id="reserve">
+        UPDATE "FILE_OWNER_QUOTA"
+        SET "USED_BYTES" = "USED_BYTES" + #{size}
+        WHERE "OWNER_USER_ID" = #{ownerUserId}
+            AND "USED_BYTES" &lt;= 104857600 - #{size}
+    </update>
+    <!-- 메타데이터 삭제와 같은 transaction에서 예약량을 반환한다. -->
+    <update id="release">
+        UPDATE "FILE_OWNER_QUOTA"
+        SET "USED_BYTES" = "USED_BYTES" - #{size}
+        WHERE "OWNER_USER_ID" = #{ownerUserId}
+            AND "USED_BYTES" &gt;= #{size}
+    </update>
+    <!-- 파일이 준비되기 전에는 공개하지 않는 행으로 추가한다. -->
+    <insert id="insert">
+        INSERT INTO "FILE_ASSET" (
+            "FILE_ID"
+            , "OWNER_USER_ID"
+            , "STORAGE_KEY"
+            , "ORIGINAL_NAME"
+            , "CONTENT_TYPE"
+            , "SIZE_BYTES"
+            , "WIDTH"
+            , "HEIGHT"
+            , "CREATED_AT"
+            , "STATUS"
+        )
+        VALUES (
+            #{fileId}::uuid
+            , #{ownerUserId}
+            , #{storageKey}
+            , #{originalName}
+            , #{contentType}
+            , #{size}
+            , #{width}
+            , #{height}
+            , #{createdAt}
+            , 'PENDING'
+        )
+    </insert>
+    <!-- 영속 전용 record의 이름과 자료형에 맞춘 공통 컬럼이다. -->
+    <sql id="columns">
+        "FILE_ID"::text AS "FILE_ID"
+        , "OWNER_USER_ID"
+        , "STORAGE_KEY"
+        , "ORIGINAL_NAME"
+        , "CONTENT_TYPE"
+        , "SIZE_BYTES" AS "SIZE"
+        , "WIDTH"
+        , "HEIGHT"
+        , "CREATED_AT"
+        , "STATUS"
+    </sql>
+    <!-- 불투명 ID만으로 접근하지 않고 현재 소유자 조건을 함께 사용한다. -->
+    <select id="selectOwned" resultType="com.example.starter.file.model.StoredFile">
+        SELECT
+            <include refid="columns"/>
+        FROM "FILE_ASSET"
+        WHERE "FILE_ID" = #{fileId}::uuid
+            AND "OWNER_USER_ID" = #{ownerUserId}
+    </select>
+    <!-- 본인의 완료 파일만 목록과 count에 포함한다. -->
+    <sql id="readyOwner">
+        WHERE "OWNER_USER_ID" = #{ownerUserId}
+            AND "STATUS" = 'READY'
+    </sql>
+    <!-- 사용자가 지정한 SQL 정렬 대신 생성시각과 ID로 순서를 고정한다. -->
+    <select id="selectList" resultType="com.example.starter.file.model.StoredFile">
+        SELECT
+            <include refid="columns"/>
+        FROM "FILE_ASSET"
+        <include refid="readyOwner"/>
+        ORDER BY
+            "CREATED_AT" DESC
+            , "FILE_ID" DESC
+        LIMIT #{size} OFFSET #{offset}
+    </select>
+    <!-- 목록과 같은 소유자·공개 조건의 수를 센다. -->
+    <select id="count" resultType="long">
+        SELECT COUNT(*)
+        FROM "FILE_ASSET"
+        <include refid="readyOwner"/>
+    </select>
+    <!-- 최종 저장에 성공한 PENDING만 공개 상태로 바꾼다. -->
+    <update id="ready">
+        UPDATE "FILE_ASSET"
+        SET "STATUS" = 'READY'
+        WHERE "FILE_ID" = #{fileId}::uuid
+            AND "OWNER_USER_ID" = #{ownerUserId}
+            AND "STATUS" = 'PENDING'
+    </update>
+    <!-- 삭제 중에는 새 목록과 다운로드에서 파일을 숨긴다. -->
+    <update id="deleting">
+        UPDATE "FILE_ASSET"
+        SET "STATUS" = 'DELETING'
+        WHERE "FILE_ID" = #{fileId}::uuid
+            AND "OWNER_USER_ID" = #{ownerUserId}
+            AND "STATUS" = 'READY'
+    </update>
+    <!-- 보상/삭제 완료는 확인한 소유자와 상태에 한 번만 적용한다. -->
+    <delete id="delete">
+        DELETE FROM "FILE_ASSET"
+        WHERE "FILE_ID" = #{fileId}::uuid
+            AND "OWNER_USER_ID" = #{ownerUserId}
+            AND "STATUS" = #{status}
+    </delete>
+</mapper>

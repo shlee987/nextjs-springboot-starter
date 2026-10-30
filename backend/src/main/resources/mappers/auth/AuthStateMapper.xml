@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.starter.auth.store.AuthStateMapper">
+    <!-- 요청 bucket의 epoch sentinel은 정책 fingerprint 전용이며 자동 만료하지 않는다. -->
+    <select id="selectPolicyLock" resultType="string">
+        SELECT pg_advisory_xact_lock(752961123)::text
+    </select>
+    <!-- reserved epoch bucket의 정책만 조회한다. -->
+    <select id="selectPolicyList" resultType="string">
+        SELECT "BUCKET_KEY" FROM "AUTH_ATTEMPT_BUCKET"
+        WHERE "BUCKET_TYPE" = 'REQUEST' AND "WINDOW_START_AT" = TIMESTAMPTZ '1970-01-01 00:00:00+00'
+    </select>
+    <!-- 정리되지 않는 reserved 정책 bucket을 기록한다. -->
+    <insert id="insertPolicy">
+        INSERT INTO "AUTH_ATTEMPT_BUCKET" ("BUCKET_TYPE", "BUCKET_KEY", "WINDOW_START_AT", "ATTEMPTS", "EXPIRES_AT")
+        VALUES ('REQUEST', #{digest}, TIMESTAMPTZ '1970-01-01 00:00:00+00', 0, 'infinity') ON CONFLICT DO NOTHING
+    </insert>
+    <!-- guard는 사용자별 인증과 변경의 공통 잠금 경계다. -->
+    <insert id="insertGuard">
+        INSERT INTO "AUTH_USER_GUARD" ("USER_ID", "UPDATED_AT")
+        VALUES (#{userId}, to_timestamp(#{now} / 1000.0)) ON CONFLICT DO NOTHING
+    </insert>
+    <!-- 사용자별 상태 변경을 직렬화하고 fence 소유자를 반환한다. -->
+    <select id="selectGuardForUpdate" resultType="string">
+        SELECT CASE WHEN "BLOCKED" THEN coalesce("OPERATION_ID"::text, 'BLOCKED') ELSE '' END
+        FROM "AUTH_USER_GUARD" WHERE "USER_ID" = #{userId} FOR UPDATE
+    </select>
+    <!-- sid의 현재 상태를 읽는다. -->
+    <select id="selectLogin" resultType="com.example.starter.auth.model.AuthLogin">
+        SELECT "LOGIN_ID"::text AS "SID", "USER_ID"
+        , (extract(epoch FROM "CREATED_AT") * 1000)::bigint AS "CREATED_AT"
+        , (extract(epoch FROM "AUTHENTICATED_AT") * 1000)::bigint AS "AUTHENTICATED_AT"
+        , (extract(epoch FROM "LAST_ACTIVITY_AT") * 1000)::bigint AS "LAST_ACTIVITY_AT"
+        , (extract(epoch FROM "IDLE_EXPIRES_AT") * 1000)::bigint AS "IDLE_EXPIRES_AT"
+        , (extract(epoch FROM "ABSOLUTE_EXPIRES_AT") * 1000)::bigint AS "ABSOLUTE_EXPIRES_AT"
+        , (extract(epoch FROM "REVOKED_AT") * 1000)::bigint AS "REVOKED_AT"
+        , "REVOKE_REASON", "PERMISSIONS_JSON"::text AS "PERMISSIONS_JSON", "CURRENT_REFRESH_HASH" FROM "AUTH_LOGIN" WHERE "LOGIN_ID" = #{sid}::uuid
+    </select>
+    <!-- refresh 현재/과거 해시의 sid를 읽는다. -->
+    <select id="selectSidByHash" resultType="string">
+        SELECT "LOGIN_ID"::text FROM "AUTH_LOGIN" WHERE "CURRENT_REFRESH_HASH" = #{hash}
+        UNION ALL
+        SELECT "LOGIN_ID"::text FROM "AUTH_REFRESH_HISTORY" WHERE "TOKEN_HASH" = #{hash}
+        LIMIT 1
+    </select>
+    <!-- 활성 로그인 수를 guard 잠금 하에서 계산한다. -->
+    <select id="selectActiveCount" resultType="long">
+        SELECT count(*) FROM "AUTH_LOGIN" WHERE "USER_ID" = #{userId} AND "REVOKED_AT" IS NULL
+            AND "IDLE_EXPIRES_AT" &gt; to_timestamp(#{now} / 1000.0)
+            AND "ABSOLUTE_EXPIRES_AT" &gt; to_timestamp(#{now} / 1000.0)
+    </select>
+    <!-- 새 로그인 상태를 기록한다. -->
+    <insert id="insertLogin">
+        INSERT INTO "AUTH_LOGIN" ("LOGIN_ID", "USER_ID", "CREATED_AT", "AUTHENTICATED_AT"
+            , "LAST_ACTIVITY_AT", "IDLE_EXPIRES_AT", "ABSOLUTE_EXPIRES_AT", "PERMISSIONS_JSON", "CURRENT_REFRESH_HASH")
+        VALUES (#{sid}::uuid, #{userId}, to_timestamp(#{createdAt} / 1000.0)
+            , to_timestamp(#{authenticatedAt} / 1000.0), to_timestamp(#{lastActivityAt} / 1000.0)
+            , to_timestamp(#{idleExpiresAt} / 1000.0), to_timestamp(#{absoluteExpiresAt} / 1000.0)
+            , #{permissionsJson}::jsonb, #{currentRefreshHash})
+    </insert>
+    <!-- 사용한 hash tombstone을 기록한다. -->
+    <insert id="insertHistory">
+        INSERT INTO "AUTH_REFRESH_HISTORY" ("TOKEN_HASH", "LOGIN_ID", "USED_AT", "EXPIRES_AT")
+        VALUES (#{hash}, #{sid}::uuid, to_timestamp(#{now} / 1000.0), to_timestamp(#{expiry} / 1000.0))
+    </insert>
+    <!-- 단회 hash CAS를 수행한다. -->
+    <update id="updateRefresh">
+        UPDATE "AUTH_LOGIN" SET "CURRENT_REFRESH_HASH" = #{newHash}
+        WHERE "LOGIN_ID" = #{sid}::uuid AND "CURRENT_REFRESH_HASH" = #{oldHash}
+    </update>
+    <!-- 활성 상태만 MAX로 touch한다. -->
+    <update id="updateActivity">
+        UPDATE "AUTH_LOGIN" SET "LAST_ACTIVITY_AT" = greatest("LAST_ACTIVITY_AT", to_timestamp(#{now} / 1000.0))
+            , "IDLE_EXPIRES_AT" = least("ABSOLUTE_EXPIRES_AT", greatest("IDLE_EXPIRES_AT", to_timestamp((#{now} + #{idleMillis}) / 1000.0)))
+        WHERE "LOGIN_ID" = #{sid}::uuid AND "REVOKED_AT" IS NULL
+            AND "IDLE_EXPIRES_AT" &gt; to_timestamp(#{now} / 1000.0)
+            AND "ABSOLUTE_EXPIRES_AT" &gt; to_timestamp(#{now} / 1000.0)
+    </update>
+    <!-- sid를 폐기한다. -->
+    <update id="updateRevoked">
+        UPDATE "AUTH_LOGIN" SET "REVOKED_AT" = to_timestamp(#{now} / 1000.0), "REVOKE_REASON" = #{reason}
+        WHERE "LOGIN_ID" = #{sid}::uuid AND "REVOKED_AT" IS NULL
+    </update>
+    <!-- 사용자 전체 sid를 폐기한다. -->
+    <update id="updateAllRevoked">
+        UPDATE "AUTH_LOGIN" SET "REVOKED_AT" = to_timestamp(#{now} / 1000.0), "REVOKE_REASON" = #{reason}
+        WHERE "USER_ID" = #{userId} AND "REVOKED_AT" IS NULL
+    </update>
+    <!-- fence 소유자를 기록하거나 해제한다. -->
+    <update id="updateFence">
+        UPDATE "AUTH_USER_GUARD" SET "BLOCKED" = (#{operationId,jdbcType=VARCHAR} IS NOT NULL)
+            , "OPERATION_ID" = #{operationId,jdbcType=VARCHAR}::uuid, "UPDATED_AT" = to_timestamp(#{now} / 1000.0)
+        WHERE "USER_ID" = #{userId}
+    </update>
+    <!-- ON CONFLICT의 행 잠금으로 다중 서버 증가를 직렬화한다. -->
+    <select id="selectConsumedBucket" resultType="long" affectData="true" flushCache="true">
+        INSERT INTO "AUTH_ATTEMPT_BUCKET" ("BUCKET_TYPE", "BUCKET_KEY", "WINDOW_START_AT", "ATTEMPTS", "BLOCKED_UNTIL", "EXPIRES_AT")
+        VALUES (#{type}, #{hash}, to_timestamp((#{now} - mod(#{now}, #{window})) / 1000.0), 1
+            , CASE WHEN #{maximum} = 1 THEN to_timestamp((#{now} + #{lock}) / 1000.0) END
+            , to_timestamp((#{now} - mod(#{now}, #{window}) + #{window} + #{lock}) / 1000.0))
+        ON CONFLICT ("BUCKET_TYPE", "BUCKET_KEY", "WINDOW_START_AT") DO UPDATE
+        SET "ATTEMPTS" = "AUTH_ATTEMPT_BUCKET"."ATTEMPTS" + 1
+            , "BLOCKED_UNTIL" = CASE WHEN "AUTH_ATTEMPT_BUCKET"."ATTEMPTS" + 1 = #{maximum}
+                THEN to_timestamp((#{now} + #{lock}) / 1000.0) ELSE "AUTH_ATTEMPT_BUCKET"."BLOCKED_UNTIL" END
+        RETURNING CASE WHEN "ATTEMPTS" &gt; #{maximum}
+            THEN greatest(1, ceil(extract(epoch FROM ("EXPIRES_AT" - to_timestamp(#{now} / 1000.0))))::bigint)
+            ELSE 0 END
+    </select>
+    <!-- 현재 계정 잠금만 확인한다. -->
+    <select id="selectAccountRetry" resultType="long">
+        SELECT greatest(0, ceil(extract(epoch FROM (max("BLOCKED_UNTIL") - to_timestamp(#{now} / 1000.0)))))::bigint
+        FROM "AUTH_ATTEMPT_BUCKET" WHERE "BUCKET_TYPE" = 'ACCOUNT' AND "BUCKET_KEY" = #{hash}
+    </select>
+    <!-- 성공한 계정의 실패 bucket만 정리한다. -->
+    <delete id="deleteAccount">
+        DELETE FROM "AUTH_ATTEMPT_BUCKET" WHERE "BUCKET_TYPE" = 'ACCOUNT' AND "BUCKET_KEY" = #{hash}
+    </delete>
+    <!-- 절대 만료 tombstone을 batch 정리한다. -->
+    <delete id="deleteExpiredLogins">
+        DELETE FROM "AUTH_LOGIN" WHERE "LOGIN_ID" IN (SELECT "LOGIN_ID" FROM "AUTH_LOGIN"
+            WHERE "ABSOLUTE_EXPIRES_AT" &lt;= to_timestamp(#{now} / 1000.0) LIMIT 1000 FOR UPDATE SKIP LOCKED)
+    </delete>
+    <!-- 만료된 제한 bucket을 batch 정리한다. -->
+    <delete id="deleteExpiredBuckets">
+        DELETE FROM "AUTH_ATTEMPT_BUCKET" WHERE ("BUCKET_TYPE", "BUCKET_KEY", "WINDOW_START_AT") IN
+            (SELECT "BUCKET_TYPE", "BUCKET_KEY", "WINDOW_START_AT" FROM "AUTH_ATTEMPT_BUCKET"
+             WHERE "EXPIRES_AT" &lt;= to_timestamp(#{now} / 1000.0) LIMIT 1000 FOR UPDATE SKIP LOCKED)
+    </delete>
+</mapper>

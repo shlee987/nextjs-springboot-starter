@@ -39,9 +39,19 @@ export function getEnvironment(environment: NodeJS.ProcessEnv = process.env) {
 
   return {
     appEnv: appEnv satisfies AppEnvironment,
+    examplesEnabled: getExamplesEnabled(environment.APP_EXAMPLES_ENABLED, appEnv),
     localApiOrigin:
       appEnv === 'local' ? getLocalApiOrigin(environment.LOCAL_API_ORIGIN) : undefined,
   };
+}
+
+/** 예제 공개 여부는 명시 boolean만 허용하며 공유 환경의 기본값은 false다. */
+function getExamplesEnabled(value: string | undefined, appEnv: AppEnvironment): boolean {
+  if (value !== undefined && value !== 'true' && value !== 'false') {
+    throw new Error('APP_EXAMPLES_ENABLED는 true/false여야 합니다.');
+  }
+
+  return value === undefined ? appEnv === 'local' : value === 'true';
 }
 
 /** 로컬 개발 전달 대상은 자격·추가 경로 없는 loopback HTTP(S) origin만 허용한다. */

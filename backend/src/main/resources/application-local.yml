@@ -1,18 +1,16 @@
 server:
   address: 127.0.0.1
-  servlet:
-    session:
-      cookie:
-        name: local-session
-        secure: false
 spring:
+  main:
+    banner-mode: console
+    log-startup-info: true
   datasource:
     url: ${DB_URL:jdbc:postgresql://127.0.0.1:25432/starter_local}
     username: ${DB_USERNAME:testuser}
     password: ${DB_PASSWORD:1234}
   flyway:
     enabled: true
-    locations: classpath:db/migration
+    locations: classpath:db/migration/core
     fail-on-missing-locations: false
   data:
     redis:
@@ -22,5 +20,33 @@ spring:
       password: ${REDIS_PASSWORD:1234}
       ssl:
         enabled: false
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
 app:
+  files:
+    root: ${APP_FILES_ROOT:./.private/files}
   public-origin: ${APP_PUBLIC_ORIGIN:http://localhost:3000}
+  auth:
+    jwt:
+      issuer: urn:starter:local
+      audience: starter-api-local
+  logging:
+    file-enabled: false
+    sql:
+      enabled: true
+  audit:
+    retention-days: 30
+  bootstrap:
+    local-data-enabled: true
+
+logging:
+  level:
+    com.zaxxer.hikari: INFO
+    org.apache.catalina.core.StandardService: INFO
+    org.apache.coyote: INFO
+    org.springframework.boot.web.embedded.tomcat: INFO
+    org.springframework.boot.tomcat: INFO
+    org.flywaydb: INFO

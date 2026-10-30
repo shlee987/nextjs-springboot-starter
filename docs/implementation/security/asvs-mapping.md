@@ -1,5 +1,7 @@
 # ASVS 5.0.0 조항 대조표
 
+> 2026-10-29 적용 갱신: 이 문서의 조항 ID는 유지한다. 인증/세션/동시3개/JWT조건부/로그 수준의 이전 기본안은 [최종 설계](../backend-foundation.md)로 대체하고 [새 검증표](../backend-handoff.md)의 BF/LG/AU/AT/FEI/SEC ID와 연결해 검증한다. 과거 검토·시험 기록을 새 JWT 기능의 통과 증거로 사용하지 않는다.
+
 검토일: 2026-10-22. 공식 v5.0.0 tag의 V1~V17 본문을 대조했다. 요구사항 원문은 복제하지 않고 ID·레벨·로컬 계약·시험을 연결한다.
 
 총 345개: L1 70, L2 183, L3 92. L2 목표 누적 대상은 L1+L2 253개다. 모든 ID를 한 번씩 분류했다. 문서 분류는 구현 통과나 ASVS 인증이 아니다.
@@ -11,7 +13,7 @@
 - 결정필수: 표준과 기본안 차이 또는 제품 선택 관문. 해소 전 충족 선언 금지.
 - 선택강화: L3 범위. 목표 상향·고위험 기능 채택 시 세부 설계·시험을 확장.
 
-GOV는 [보완 통제](controls.md), HDR는 [헤더](headers-csp.md), FE는 [프론트](frontend.md), API는 [백엔드](backend.md), CFG는 [설정](configuration.md), OPS는 [인프라](infrastructure.md), CI는 [공급망](supply-chain.md)를 참조한다. V01~V22는 [검증](verification.md), V23~V36은 [상세 시험](test-cases.md)이다. 모든 동작 시험은 미실행이다.
+GOV는 [보완 통제](controls.md), HDR는 [헤더](headers-csp.md), FE는 [프론트](frontend.md), API는 [백엔드](backend.md), CFG는 [설정](configuration.md), OPS는 [인프라](infrastructure.md), CI는 [공급망](supply-chain.md)를 참조한다. V01~V22는 [검증](verification.md), V23~V36은 [상세 시험](test-cases.md)이다. 이 대조표를 처음 작성한 시점에는 동작 시험을 실행하지 않았다. 이후 공통 기반·후속 기능의 실제 시험 결과는 [현재 현황](../foundation-status.md)과 모듈 검증표를 따른다. 이 분류표 전체를 시험 통과표로 해석하지 않는다.
 
 각 행은 조항의 분류·추적용이다. 기능 조건·구체 계약은 연결 문서와 결정 관문을 함께 적용한다. 적용 가능한 L3 일부를 강화해도 L3 전체 충족을 의미하지 않는다.
 

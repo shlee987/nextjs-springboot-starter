@@ -25,7 +25,7 @@
 ## 구현 설계와 공식 문서 확인
 
 - 구현·설정 작업 전에 `docs/implementation/README.md`와 `docs/implementation/decisions.md`를 읽고, 담당 영역의 설계문서를 적용한다.
-- 현재 1차는 프로젝트 세팅이다. `docs/implementation/initial-setup.md`의 단계 범위와 `docs/implementation/api-contract.md`의 공통 응답을 적용한다. 후속 업무·로그인·UI 상세 미정은 해당 기능만 보류하며 1차 기반 구성을 막지 않는다.
+- 1차 세팅의 실행 이력은 `docs/implementation/initial-setup.md`와 change-history.md를 따른다. 현재 백엔드 공통 기반의 최종 설계는 `docs/implementation/backend-foundation.md` 및 연결된 인증·DB·로그·인계 문서가 소유한다. JWT·Redis/JDBC·동시 로그인 선택은 새 설계로 대체하며 외부 SSO·UI·운영 배포는 별도 범위다. 설계 완료와 구현·실행 검증을 구분한다.
 - 공통 보안 지침의 공식 URL은 설계 근거다. 일상 구현에서는 해당 근거를 구체화한 `docs/implementation/security/`의 요구사항·설정·검증 계약을 우선 참조한다.
 - 같은 작업에서 공식 URL을 반복 열람하지 않는다. 새 버전·제품·기능·인증/배포 구조·보안 권고·실제 동작 불일치가 발생하면 설계 담당자가 해당 공식 자료를 다시 확인하고 설계와 검증 기준을 갱신한다. 이 항목은 공통 보안 guide의 참조 절차를 이 프로젝트에 구체화한다.
 - 보안 작업은 `docs/implementation/security/controls.md`의 공통 보완 통제와 `docs/implementation/security/asvs-mapping.md`의 해당 조항을 함께 적용한다. V01~V22는 `docs/implementation/security/verification.md`, V23~V36은 `docs/implementation/security/test-cases.md`를 기준으로 검증한다.

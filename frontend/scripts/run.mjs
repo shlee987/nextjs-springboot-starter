@@ -77,6 +77,7 @@ try {
     '선택한 환경',
     '선택한 명령',
     'APP_ENV는',
+    'APP_EXAMPLES_ENABLED',
     'APP_PUBLIC_ORIGIN',
     'LOCAL_API_ORIGIN',
     '추가 인자는',

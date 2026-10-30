@@ -1,6 +1,6 @@
 # 공통 API 응답 계약
 
-기준일: 2026-10-26 / 적용: 1차 프로젝트 세팅부터 / 상태: 설계 확정, 구현 전.
+기준일: 2026-10-30 / 적용: 공통 기반 구현과 후속 파일 API에 적용한다. 실제 명세는 docs/api/openapi.json, 검증 상태는 foundation-status.md와 모듈 검증표를 따른다. 과거 1차 기록과 현재 결과를 구분한다.
 
 목표는 백엔드 개발자가 공통 반환 함수를 사용하고 프론트가 정해진 양식으로 처리하게 하는 것이다. 개별 업무 URL·로그인 payload·도메인 DTO는 기능별 단계에서 정한다. 이 문서는 현재 프로젝트의 공통 계약이며 범용 공통 지침에 복사하지 않는다.
 
@@ -162,3 +162,15 @@ traceId·오류 분류·발생 위치와 정제한 원인/스택을 제한된 �
 통과 조건은 올바른 HTTP 상태·고정 code·안전한 title·traceId 일치, 허용 필드만 존재, 합성 표식과 원문 예외 정보가 응답 body/헤더/HTML에 없음이다. JSON 요청과 HTML Accept, ?trace=true&message=true&errors=true 같은 노출 유도 요청도 확인한다. 헤더·본문이 전송된 후 실패하는 경우의 한계는 별도로 기록한다.
 
 검증 결과는 V15·V22의 해당 범위에 연결한다. 이번 문서는 계약 작성이며 아직 처리기 코드나 실제 비노출 시험을 실행한 것은 아니다.
+
+## 후속 백엔드 계약 — 2026-10-29
+
+공개 날짜·정밀숫자·null·안전정수는 [최종 설계 1단계](backend-foundation.md), 로그인 payload/상태/오류는 [API 인계표](backend-handoff.md), JWT·CSRF·cookie는 [인증](authentication-foundation.md)이 소유한다. 기존 envelope/허용 오류필드/예외 비노출은 변경하지 않는다. 개별 API가 아직 미정이라는 본문 표현은 1차 당시 경계이며 이번 표에 나온 API는 확정이다.
+
+추가 code: LOGIN_FAILED/TOKEN_EXPIRED/TOKEN_REVOKED/TOKEN_REFRESH_REUSED(401), ORIGIN_REJECTED(403), CONCURRENT_LOGIN_DENIED/PASSWORD_LOGIN_UNAVAILABLE(409), CURRENT_PASSWORD_INVALID/PASSWORD_UNCHANGED(400), AUTH_STATE_UNAVAILABLE/AUDIT_UNAVAILABLE(503). title은 안전 HTTP제목 유지, 오류에 새 message/detail/params/토큰을 추가하지 않는다.
+
+설정 오류/저장소 장애는503으로 구분하고 인증 실패401로 바꾸지 않는다. TOKEN_EXPIRED 응답은 refresh 쿠키를 삭제하지 않으며 refresh 자체의401은 자동갱신하지 않는다. 일반API의 세션 cookie 인증은 허용하지 않는다.
+
+## 파일 API의 응답
+
+[파일 기능 설계](attack-defense-and-files.md)의 파일 업로드·목록은 기존 성공 envelope를 사용한다. 업로드는 `multipart/form-data`의 `file` 한 개이며 생성 성공은201과 Location을 반환한다. 다운로드 성공만 이미지 바이너리 응답이며 JSON envelope로 감싸지 않는다. 다운로드 실패는 기존 안전한 오류 형식이므로 프론트는 Blob을 성공 파일로 저장하기 전에 상태와 형식을 확인한다. 삭제 성공204에는 응답 본문이 없다. 목록·다운로드·삭제 모두 서버에서 소유자를 검사한다. 정확한 타입·필수 필드·헤더는 [실제 OpenAPI](../api/openapi.json)를 따른다.

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.starter.auth.config.DevelopmentKeyMapper">
+    <!-- 최초 키 생성 경쟁을 DB transaction advisory lock으로 직렬화한다. -->
+    <select id="selectInitializationLock" resultType="string">
+        SELECT pg_advisory_xact_lock(752961122)::text
+    </select>
+    <!-- 현재 active 키를 byte 배열로 읽는다. -->
+    <select id="selectActiveKey" resultType="com.example.starter.auth.config.DevelopmentKeyMapper$KeyRow">
+        SELECT "KEY_ID", "PRIVATE_KEY_PKCS8", "PUBLIC_KEY_SPKI", "ACTIVE"
+        FROM starter_local_only."DEV_SIGNING_KEY" WHERE "ACTIVE"
+    </select>
+    <!-- 회전 전 공개키도 기존 access 검증용으로 읽는다. -->
+    <select id="selectKeyList" resultType="com.example.starter.auth.config.DevelopmentKeyMapper$KeyRow">
+        SELECT "KEY_ID", NULL::bytea AS "PRIVATE_KEY_PKCS8", "PUBLIC_KEY_SPKI", "ACTIVE"
+        FROM starter_local_only."DEV_SIGNING_KEY" ORDER BY "KEY_ID"
+    </select>
+    <!-- local DB에 생성한 키를 한 번 기록한다. -->
+    <insert id="insertKey">
+        INSERT INTO starter_local_only."DEV_SIGNING_KEY" ("KEY_ID", "PRIVATE_KEY_PKCS8", "PUBLIC_KEY_SPKI", "CREATED_AT", "ACTIVE")
+        VALUES (#{keyId}, #{privateKey}, #{publicKey}, #{now}, true)
+    </insert>
+</mapper>

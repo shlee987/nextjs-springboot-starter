@@ -4,6 +4,24 @@ import { z } from 'zod';
 import { fieldMessages, messages } from '@/messages/messages';
 
 const apiCodes = z.enum([
+  'FILE_NAME_INVALID',
+  'FILE_TYPE_UNSUPPORTED',
+  'FILE_CONTENT_INVALID',
+  'FILE_QUOTA_EXCEEDED',
+  'FILE_PROCESSING_BUSY',
+  'FILE_STORAGE_UNAVAILABLE',
+  'FILE_METADATA_UNAVAILABLE',
+  'LOGIN_FAILED',
+  'TOKEN_EXPIRED',
+  'TOKEN_REVOKED',
+  'TOKEN_REFRESH_REUSED',
+  'CONCURRENT_LOGIN_DENIED',
+  'ORIGIN_REJECTED',
+  'CURRENT_PASSWORD_INVALID',
+  'PASSWORD_UNCHANGED',
+  'PASSWORD_LOGIN_UNAVAILABLE',
+  'AUTH_STATE_UNAVAILABLE',
+  'AUDIT_UNAVAILABLE',
   'VALIDATION_FAILED',
   'MALFORMED_REQUEST',
   'UNAUTHENTICATED',
@@ -47,6 +65,7 @@ export class ApiError extends Error {
     public readonly status?: number,
     public readonly traceId?: string,
     public readonly fieldErrors: { field: string; code: keyof typeof fieldMessages }[] = [],
+    public readonly retryAfterSeconds?: number,
   ) {
     super(messages[code]);
     this.name = 'ApiError';
@@ -76,6 +95,10 @@ export function normalizeApiError(error: unknown): ApiError {
   }
 
   const status = error.response.status;
+  const retryHeader = String(error.response.headers['retry-after'] ?? '');
+  const retryAfterSeconds = /^\d{1,5}$/.test(retryHeader)
+    ? Math.min(86400, Number(retryHeader))
+    : undefined;
   const contentType = String(error.response.headers['content-type'] ?? '').split(';')[0];
   const problem =
     contentType === 'application/problem+json'
@@ -94,8 +117,32 @@ export function normalizeApiError(error: unknown): ApiError {
           fields.findIndex((other) => other.field === item.field && other.code === item.code) ===
           index,
       ),
+      retryAfterSeconds,
     );
   }
 
-  return new ApiError('UNEXPECTED_ERROR', status);
+  return new ApiError('UNEXPECTED_ERROR', status, undefined, [], retryAfterSeconds);
+}
+
+/** 바이너리 요청의 제한된 problem JSON만 해석한다. 원문·큰 응답·잘못된 JSON은 공개하지 않는다. */
+export async function normalizeApiResponseError(error: unknown): Promise<ApiError> {
+  if (axios.isAxiosError(error) && error.response?.data instanceof Blob) {
+    const response = error.response;
+    const contentType = String(response.headers['content-type'] ?? '').split(';')[0];
+
+    if (contentType === 'application/problem+json' && response.data.size <= 16 * 1024) {
+      try {
+        const data: unknown = JSON.parse(await response.data.text());
+
+        return normalizeApiError({
+          isAxiosError: true,
+          response: { status: response.status, headers: response.headers, data },
+        });
+      } catch {
+        return new ApiError('UNEXPECTED_ERROR', response.status);
+      }
+    }
+  }
+
+  return normalizeApiError(error);
 }

@@ -1,5 +1,7 @@
 # 기본 라이브러리 역할과 통합 원칙
 
+> 2026-10-29 현재 인증 계약은 [JWT·Redis/JDBC·공유 세션 공존](authentication-foundation.md), 로그는 [로그·감사](backend-observability.md)로 갱신했다. 본문의 D04 후속/JWT 자동 미도입 표현은 1차 구성 선정 당시 설명이며 이번 명시 채택을 취소하지 않는다. 기존 정확 버전 유지, 새 의존성의 설치 증거는 아직 없다.
+
 작성일: 2026-10-22 / 검토 갱신: 2026-10-26 / 상태: 기본 구성·버전 선정 완료. 설치·잠금 파일·호환성 실행 검증 전.
 
 사용자 방향: Next.js·React·TypeScript + Java·Spring Boot API, 공개 저장소에서 쉽게 시험할 수 있는 Docker 기반 DB. Redis 도입과 Docker의 로컬 편의 도구 범위는 사용자 요구로 반영한다. 데이터 접근은 MyBatis 단독 사용으로 사용자 확정이다. TanStack Query, React Hook Form, Zod + @hookform/resolvers, Bean Validation, Zustand, Axios, Orval 기본 포함도 사용자 확정이다. 2026-10-26 사용자의 선정 위임에 따라 PostgreSQL·OpenJDK와 나머지 기본 도구의 안정 버전을 확정했다. 정확 버전은 [확정 구성·버전표](stack-versions.md), 교체 조건은 [상황별 대체 조합](stack-alternatives.md)이 소유한다. 선택 도구는 계속 문서 전용이다.
@@ -36,7 +38,7 @@ TanStack Query는 HTTP client가 아니라 서버 데이터 상태 계층이다.
 | --- | --- | --- |
 | API | Spring MVC/Web starter | REST Controller·DTO·단일 오류 계약. WebFlux를 함께 기본 도입하지 않음 |
 | 인증·권한 | Spring Security | 세션·CSRF·기본 거부·자원/필드 권한. D04에서 실제 인증 수단 확정 |
-| 공유 세션 | Spring Session Data Redis + Spring Data Redis | 단일 서버 개발부터 공통 Redis 세션 사용. 내부 사용자/권한 경계와 다중 서버 검증 포함 |
+| 인증 상태/공유 세션 | Redis 기본 + JDBC 선택, Spring Session은 외부 로그인 진행 시 조건부 | 일반 API JWT, 토큰 상태와 임시 세션을 분리. 최종 인증 설계와 데이터 모델 적용 |
 | 입력 검증 | Jakarta Bean Validation 지원 starter — 사용자 확정 | 타입·필수·길이·범위·중첩 검증과 업무 검증 구분. [오류 문구 관리 기본안](security/backend.md)의 API05 보완 적용 |
 | DB 접근 | MyBatis-Spring Boot starter + JDBC driver | MyBatis 단독 사용 확정. PostgreSQL 제품·버전은 확정. [데이터 접근 계약](persistence.md)의 연결·트랜잭션·SQL·캐시·검증 적용 |
 | 스키마 이력 | Flyway + PostgreSQL 지원 모듈 — 확정 | 로그인·기본 화면용 테이블 준비와 스키마 변경 이력. DDL은 migration 단일 소유. local 합성 seed와 운영 DDL 분리, 실행은 Docker와 독립 |
@@ -79,13 +81,13 @@ Swagger HTML을 JSON용 CSP로 일괄 처리하지 않는다. 로컬 Swagger 자
 | Vitest | 기본 미포함. 프론트 함수·검증 규칙·Hook 등의 반복 회귀 검사가 필요할 때 검토 |
 | React Testing Library | 기본 미포함 — 사용자 결정. 입력·클릭·서버 오류 표시 등 직접 연결한 컴포넌트 동작의 반복 회귀 검사가 필요할 때 Vitest 등 테스트 실행 도구와 함께 도입 검토 |
 | Testcontainers | 기본 미포함 — 사용자 결정. 격리 DB/Redis 자동 생성·정리가 필요할 때 검토. 별도 테스트 DB를 명시적으로 준비하는 경로를 유지하고 기본 실행과 CI의 필수 조건으로 넣지 않음 |
-| Spring Session JDBC | 현재 기본은 Redis. JDBC 저장소가 필요한 별도 변형에서만 교체 설계하며 동시에 이중 세션을 운영하지 않음 |
+| Spring Session JDBC | 후속 설계에서 redis/jdbc 선택 지원 확정. 외부 로그인 진행용이며 enabled일 때만 전용 schema에 생성, 토큰 관리 테이블과 독립 |
 | Redis 일반 캐시·rate limiter | Redis 세션은 기본 포함. 추가 용도는 별도 계약·namespace·자격·용량/장애 격리를 설계한 뒤 사용 |
 | 다른 API 생성 도구 | 문서 전용 대안. OpenAPI Generator·swagger-typescript-api·openapi-typescript 비교는 이 문서의 Orval 계약 참조. 기본 설치하지 않음 |
 | MapStruct | 문서 전용 선택사항 — 사용자 결정. 반복·복잡한 DTO 변환이 실제로 많아질 때 검토. 기본 의존성·매핑 코드 미포함 |
 | Radix Themes / Tailwind CSS / shadcn/ui | 문서 전용 대안. 현재는 Radix Primitives와 일반 CSS 방향이며 기본 설치하지 않음. 별도 요구가 생기면 디자인 소유·퍼블리싱·CSP 영향을 비교 |
 | Redux Toolkit + React Redux | 문서 전용 대안. 고객 환경·팀 규칙에 따라 Zustand를 교체할 때 검토. 같은 공유 상태를 두 도구에 중복 보관하지 않음 |
-| OAuth/OIDC SDK | 외부 IdP를 D04에서 선택했을 때. JWT 자동 도입 아님 |
+| OAuth/OIDC SDK | 외부 IdP 연동 때만 추가. 자체 로그인 JWT는 최종 인증 설계로 채택했으며 외부 SDK와 구분 |
 
 근거: [Spring Session JDBC](https://docs.spring.io/spring-session/reference/configuration/jdbc.html), [openapi-typescript](https://openapi-ts.dev/introduction). 나머지 선택 도구는 현재 채택·호환성 검증한 상태가 아니며 실제 선정 시 공식 문서와 버전을 확인한다.
 
@@ -136,7 +138,7 @@ Docker Compose 연동과 조건부 Testcontainers는 로컬/테스트 도구다.
 - 처음부터 Redux 중심으로 선정하는 별도 프로젝트라면 Redux Toolkit + React Redux + RTK Query도 검토한다. RTK Query는 서버 조회·캐시 역할이므로 같은 API 데이터에 TanStack Query를 함께 적용하지 않는다.
 - RTK Query의 기본 fetchBaseQuery를 선택하면 해당 브라우저 API 경로의 Axios는 필요 없다. 기존 Axios 정책을 재사용할 명확한 이유가 있으면 Axios 기반 baseQuery를 별도 설계하되 두 요청 경로를 병행하지 않는다.
 - Next App Router에서는 사용자별 store가 서버 요청 간 공유되지 않도록 만들고 Client Component Provider 범위·초기 상태·화면 이동 시 초기화 정책을 정의한다. RSC가 store를 직접 읽거나 수정하도록 하지 않는다.
-- Redux로 교체해도 서버 인증은 Spring 세션이 기준이다. 클라이언트 store의 로그인·역할 표시를 권한 판단 근거로 삼지 않는다.
+- Redux로 교체해도 서버 인증은 JWT와 공유 인증 상태 검증이 기준이다. 클라이언트 store의 로그인·역할 표시를 권한 판단 근거로 삼지 않는다.
 
 근거: [Redux 권장 구성](https://redux.js.org/introduction/getting-started), [Next.js 구성](https://redux.js.org/usage/nextjs), [RTK Query](https://redux-toolkit.js.org/rtk-query/overview).
 

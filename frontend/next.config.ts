@@ -25,12 +25,12 @@ export default function configureNext(phase: string): NextConfig {
     return baseConfig;
   }
 
-  const { appEnv, localApiOrigin } = getEnvironment();
+  const { appEnv, localApiOrigin, examplesEnabled } = getEnvironment();
 
   return {
     ...baseConfig,
     // 공개 가능한 환경명 하나만 정적 치환한다. origin·비밀·전체 env는 복사하지 않는다.
-    env: { APP_ENV: appEnv },
+    env: { APP_ENV: appEnv, APP_EXAMPLES_ENABLED: String(examplesEnabled) },
     async rewrites() {
       return localApiOrigin
         ? [{ source: '/api/:path*', destination: `${localApiOrigin}/api/:path*` }]

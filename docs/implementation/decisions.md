@@ -1,6 +1,6 @@
 # 결정과 적용 범위
 
-기준일: 2026-10-26. 이 문서는 구현 착수 조건을 관리한다.
+기준일: 2026-10-30. 이 문서는 확정한 선택과 추가 구현 범위를 관리한다. 날짜별 과거 기록과 현재 상태를 구분하며 실제 결과는 현재 현황·모듈 검증표를 따른다.
 
 ## 사용자 확정 사항
 
@@ -17,7 +17,7 @@
 | 지침 | docs/common-rules의 규칙 적용 |
 | 작업 분리 | 프로젝트에는 공개 결과물만, 개인 작업 자료는 외부 작업 공간 |
 | 현재 역할 | 설계문서 작성. 구현은 별도 프론트·백엔드 세션에서 진행 |
-| 현재 단계 | 1차 프로젝트 세팅. 공통 API 응답·반환 편의·인증 기반·환경 구분만 우선 준비. 기능 상세는 단계별 후속 설계 |
+| 현재 단계 | 1차 세팅 완료 후 백엔드 공통 기반 최종 설계 확정. backend-foundation.md가 이번 범위와 상세 계약을 소유하며 구현은 별도 진행 |
 | 실행 환경 이름 | local/dev/stg/prod. backend Spring 프로파일, frontend APP_ENV. 프론트는 npm run local·환경별 빌드·선택 설정 파일과 공통 npm start를 제공. dev는 공유 개발 환경만 의미하며 Next 내부 NODE_ENV/CLI 모드와 구분. 상세는 initial-setup.md |
 | 공통 API 양식 | api-contract.md의 성공·오류·페이지 모델과 간편 반환 함수. HTTP 상태 유지 |
 | 실제 예외 정보 | 1차 필수. 모든 환경에서 API 응답에 예외 원문·스택·SQL·내부 경로를 노출하지 않음. 공통 오류와 traceId만 공개, 진단은 정제한 서버 로그 |
@@ -38,7 +38,7 @@
 | Java 반복 코드 감소 | Lombok 기본 포함. 필요한 생성자·접근자만 생성하고 민감 필드 출력·무차별 변경 메서드 생성 금지 |
 | 객체 변환 코드 생성 | MapStruct는 기본 미포함. 반복되는 객체 변환이 많아질 때 검토하는 문서 전용 선택사항 |
 | DB 스키마 준비 | Flyway 기본 포함. 로그인·기본 화면 예제의 테이블 생성·변경 SQL 적용. 로컬 합성 데이터와 운영 스키마 분리 |
-| Redis | 추가 사용. Spring Session Redis 공유 세션을 공통 기반으로 설계 |
+| Redis | 인증 상태 저장소 기본 redis, jdbc 선택 지원. 일반 API JWT, 외부 로그인용 Spring Session 조건부 공존 |
 | 인증 확장 | 모든 SSO를 미리 구현하지 않고 인증 수단·내부 사용자/권한·공유 세션을 분리 |
 | 버전 선정 위임 | 2026-10-26 사용자 위임에 따라 편의성 기준 DB와 최신 LTS OpenJDK, 호환되는 최신 안정 버전 조합을 설계자가 선정. [확정 버전표](stack-versions.md) 적용 |
 | 로컬 DB 제품 | PostgreSQL 18.6 확정. Redis 8.10.2와 함께 로컬 준비 |
@@ -55,12 +55,12 @@
 | D01 | 해소: OpenJDK Eclipse Temurin 25 LTS(HotSpot; OS별 실제 패치는 stack-versions.md 참조), Node 24.22.1 LTS, Next 16.4.3·React 19.3.1·TS 6.0.3, Boot 4.1.2 및 관리 BOM. 전체 정확 버전은 stack-versions.md 단일 기준 | 구성 선정 완료. 의존성 설치·lockfile·실행 호환성 검증은 후속 구현 |
 | D02 | 채택 기준: Next App Router + Node 서버 동적 렌더링, 브라우저에는 단일 HTTPS 출처 노출 | CSP·라우팅 세부 설정은 후속 설계·구현 |
 | D03 | 채택 기준: 같은 출처의 /api/**를 신뢰 프록시가 Spring으로 전달. Next는 HTML·정적 자원 제공, API 인증·권한은 Spring 책임 | 프록시 제품·네트워크·쿠키 세부 설정은 D06과 함께 확정 |
-| D04 | 기반 확정: Spring Security + Spring Session Redis + HttpOnly 쿠키 + CSRF, 기본 거부. 일반/SAML/OIDC/agent 인증 수단은 실제 연동 단계에서 선택. JWT 자동 도입 없음 | 1차 기반 구현 가능. 사용자 인증·제품 경로·계정/권한·MFA·가입/복구만 후속 기능 관문 |
+| D04 | 해소: 자체 로그인 + JWT/갱신 토큰 + HttpOnly 쿠키/CSRF. 기본Redis·선택JDBC 상태 저장, allow/deny-new/replace-old 동시 로그인. 외부 인증 진행용 Spring Session 공존 | authentication-foundation.md·backend-data-model.md·backend-handoff.md 적용. 실제 외부 연동/MFA/가입/복구는 별도 |
 | D05 | 제품·버전 해소: PostgreSQL 18.6 + MyBatis 단독 + Flyway 12.4.0 및 PostgreSQL 지원 모듈, Redis 8.10.2 + Spring Session Redis. BOM·starter 관리 버전은 버전표 적용 | 실제 스키마·DB별 설정·세션 직렬화·운영 HA는 해당 후속 상세 설계 |
 | D06 | 배포 OS·프록시·TLS 종료·컨테이너·클라우드·운영 도메인 확정 | 실행 가능한 인프라 설정 작성 전. IIS/Windows/SQL Server는 현재 필수 기술이 아니다 |
 | D07 | CI 기본안 GitHub Actions, 임시 호스팅 runner, 공개 PR과 배포 작업 분리 | 워크플로·저장소 보호 규칙 작성 전 |
 | D08 | 기본 예제에 파일 업로드·웹훅·외부 스크립트·임의 URL 조회·배치 미포함 | 도입 시 해당 조건부 설계를 활성화하고 API·검증 계약 추가 |
-| D09 | 사용자 역할·테넌트 유무·보호 데이터·리소스별 권한 표 확정 | 보호 API 설계·구현 전. 화면 역할만으로 서버 권한을 추정하지 않는다 |
+| D09 | 해소: 사용자/부서/역할/권한 관계·기본 권한표·API는 최종 설계 적용. 기본 멀티테넌트 기능 없음, 요청 tenantId로 범위 확장 금지 | backend-data-model.md·authentication-foundation.md·backend-handoff.md. 고객별 테넌트/업무 데이터 범위는 도입 시 설계 |
 | D10 | 보안 검증 목표는 일반 웹/API 위험에 맞는 ASVS L2 지향 기본안. 조항 분류·설계 연결은 0.2에서 완료. 데이터 보존·RPO/RTO·운영 책임자와 실제 조항별 충족 결과는 이후 확정 | ASVS 준수 주장과 실제 운영 배포 전 |
 | D11 | 도구·버전 해소: Radix Primitives(radix-ui 1.8.1), AG Grid Community/React 36.2.0, ECharts 6.1.0. 일반 CSS·CSS Modules·CSS 변수 채택 | 컨트롤 목록·옵션·스타일·Next/CSP 실제 동작은 공통 UI 작업 시 설계·검증 |
 
@@ -102,3 +102,16 @@ D01의 정확 버전과 D05의 로컬 DB 제품·버전을 2026-10-26 확정했�
 ## 단계 범위 확정 — 1차 프로젝트 세팅
 
 [1차 범위와 인계 기준](initial-setup.md), [공통 API 응답](api-contract.md)을 적용한다. 프론트·백엔드는 별도 구현 세션에서 준비하며 성공/오류 반환 방식과 local/dev/stg/prod 환경을 공유한다. 상세 로그인·업무 API·schema·공통 컨트롤은 순서대로 설계·구현한다. 네 환경의 실제 운영 자격·주소·IdP·업무 권한 미정은 이번 세팅의 추가 질문이나 착수 차단 항목이 아니다.
+
+## 백엔드 공통 기반 확정 — 2026-10-29
+
+[최종 설계](backend-foundation.md)가 1~4단계 결정을 소유한다. 이전 P1 세션 API 인증·JWT 미도입·동시3개·점증 지연은 이번 단계에서 대체한다. 문서의 이전 날짜 기록은 역사적 선택이며 이번 구현에 재적용하지 않는다.
+
+일반 API는 JWT, 인증 상태 redis(default)/jdbc, 필요 시 Spring Session 공존. 사용자별 TOKEN_VERSION 컬럼 없이 상태 저장소 분리. 외부 로그인 임시 세션 JDBC 테이블은 전용 schema/history로 제거 가능. 날짜3형식·UTC·밀리초, 큰숫자 문자열·프론트 정밀계산 후속예제, 실제 대문자 언더바·MyBatis 자동camel매핑 확정. local 콘솔/상세SQL, 공유환경 전체+ERROR 파일·회전·압축·보관. 접근/보안 이력과 실패정책·최소 조회API, 키/갱신/폐기/동시정책·검증범위를 확정했다. 공통 룰 사본은 이번 범위에서 바꾸지 않는다.
+
+설계 문서만 완료했다. 실제 구현·DB 변경 실행·새 라이브러리 설치·기능 검증·작업자 메시지·커밋·push는 이번 정리에서 수행하지 않았다.
+
+
+## 후속 공통 개선 확정 — 2026-10-30
+
+사용자가 PC/모바일 UI와 공통 컨트롤 옵션·라디오 표시·작업별 중복 실행 방지, 쉬운 문구·local 로그, 공격 대응 및 파일 업로드 구현을 승인했다. [UI 보완](ui-component-review.md), [문구·로그](readability-and-local-logs.md), [공격 대응·파일](attack-defense-and-files.md)이 이번 추가 범위를 소유한다. 새 UI 프레임워크·클라우드 저장소·전역 문자열 치환 필터는 도입하지 않는다. 과거의 문서만 작성했다는 기록은 그 날짜의 이력이다. 현재 구현·실행·독립 리뷰 상태는 [현재 현황](foundation-status.md)을 따른다. 커밋·push는 사용자가 직접 진행할 예정이며 수행하지 않는다.

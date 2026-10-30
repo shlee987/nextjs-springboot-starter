@@ -13,7 +13,7 @@ export function proxy(request: NextRequest) {
     "script-src-attr 'none'",
     isLocalDevelopment ? "style-src 'self' 'unsafe-inline'" : `style-src 'self' 'nonce-${nonce}'`,
     `style-src-attr ${isLocalDevelopment ? "'unsafe-inline'" : "'none'"}`,
-    "img-src 'self' data:",
+    "img-src 'self' data: blob:",
     "font-src 'self'",
     `connect-src 'self'${isLocalDevelopment ? ' ws://127.0.0.1:3000 ws://localhost:3000' : ''}`,
     "media-src 'none'",

@@ -1,12 +1,21 @@
+import { existsSync, statSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'orval';
 
-const specPath = process.env.OPENAPI_SPEC_PATH;
+const configDirectory = dirname(fileURLToPath(import.meta.url));
+const specPath = resolve(
+  configDirectory,
+  process.env.OPENAPI_SPEC_PATH ?? '../docs/api/openapi.json',
+);
 
-if (!specPath) {
-  throw new Error('OPENAPI_SPEC_PATH에 backend가 제공한 로컬 OpenAPI 파일을 지정해야 합니다.');
+if (!existsSync(specPath) || !statSync(specPath).isFile()) {
+  throw new Error(
+    `OpenAPI 파일을 찾을 수 없습니다: ${specPath}. docs/api/openapi.json을 준비하거나 OPENAPI_SPEC_PATH에 로컬 명세 파일을 지정하세요.`,
+  );
 }
 
-/** 실제 명세 제공 이후에만 Axios·Query v5 코드를 생성한다. 가짜 명세와 mock은 생성하지 않는다. */
+/** 저장소의 실제 명세 또는 명시한 로컬 명세로 Axios·Query v5 코드를 생성한다. mock은 생성하지 않는다. */
 export default defineConfig({
   api: {
     input: { target: specPath },
@@ -18,7 +27,7 @@ export default defineConfig({
       mock: false,
       override: {
         mutator: { path: './src/api/client.ts', name: 'apiMutator' },
-        query: { version: 5, useQuery: true, useMutation: true, signal: true },
+        query: { version: 5, signal: true },
       },
     },
   },

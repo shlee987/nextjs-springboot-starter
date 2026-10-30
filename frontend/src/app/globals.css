@@ -1,25 +1,122 @@
-:root {
-  --color-background: #fff;
-  --color-text: #17202a;
-  --color-focus: #245bdb;
+@import '../styles/tokens.css';
+@font-face {
+  font-family: Pretendard;
+  src: url('/fonts/pretendard/PretendardVariable.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
 }
-
 * {
   box-sizing: border-box;
+}
+html {
+  font-size: 16px;
 }
 body {
   margin: 0;
   background: var(--color-background);
   color: var(--color-text);
-  font-family: system-ui, sans-serif;
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: 1.5;
+}
+a {
+  color: var(--color-primary);
+  text-underline-offset: 0.2em;
+}
+h1,
+h2,
+h3,
+p,
+dl,
+dd,
+fieldset {
+  margin: 0;
+}
+h1 {
+  font-size: var(--text-title);
+  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+h2 {
+  font-size: var(--text-section);
+  line-height: 1.4;
+  font-weight: 650;
+}
+h3 {
+  font-size: 1rem;
+  line-height: 1.4;
+}
+fieldset {
+  border: 0;
+  padding: 0;
+  min-inline-size: 0;
+}
+legend {
+  padding: 0;
+  margin-bottom: var(--space-2);
+  font-weight: 600;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  cursor: not-allowed;
 }
 button,
 input,
 select,
 textarea {
   font: inherit;
+  max-width: 100%;
+}
+input,
+textarea {
+  min-width: 0;
+}
+textarea {
+  resize: vertical;
+}
+svg {
+  display: block;
+  flex-shrink: 0;
+}
+pre,
+code {
+  font-family: ui-monospace, 'Cascadia Code', monospace;
+  font-size: 0.8125rem;
+}
+pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 0;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-table);
+}
+th,
+td {
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+}
+th {
+  background: var(--color-background);
+  font-weight: 600;
 }
 :focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: 3px;
+}
+summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+@media (max-width: 575px) {
+  body {
+    font-size: 1rem;
+  }
 }
