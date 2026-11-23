@@ -90,3 +90,20 @@
 ### 추가 수정 확인 방법
 
 이번 색상/라디오/로딩/검색 빈 결과/달력 열린 모습은 PC와 모바일 실제 화면으로 확인한다. 비교 대상과 결과 이미지를 외부 작업 공간에 보관한다. 날짜 변경은 기존 foundation 날짜 회귀와 키보드·폼 연결을 검사하고, 공통 로딩과 선택 스타일 변경은 관련 목록/폼/버튼 예제도 확인한다. 타입·lint·형식·local/prod 빌드를 적용하고 이전 API 생성 기본 경로 수정은 보존한다. 값/인증/데이터 계층은 바꾸지 않는다. 완료 후 기존 리뷰 채팅에서 공통 컨트롤·날짜 정확성·접근성·CSP를 독립 검토한다.
+
+## 공통 컨트롤과 기준 화면
+
+조회·편집·읽기 전용·저장·필터의 공통 원칙은 [UI 규칙](../common-rules/docs/conventions/styles/common.md), 업무 판단과 회귀 검증은 [책임과 흐름](../common-rules/docs/conventions/common/design.md)과 [변경과 검증](../common-rules/docs/conventions/common/changes.md)을 따른다. 아래는 현재 구현의 참조 위치이며 모든 예제의 실서버 저장이나 전체 검증 완료를 뜻하지 않는다.
+
+| 용도 | 공통 구현 | 대표 사용 화면·구현 |
+| --- | --- | --- |
+| 버튼·중복 실행 | [Button](../../frontend/src/components/ui/Button.tsx), [ActionProvider](../../frontend/src/providers/ActionProvider.tsx) | `/examples/buttons`, [ActionExample](../../frontend/src/features/examples/ActionExample.tsx) |
+| 입력·읽기 전용·폼 검증 | [Inputs](../../frontend/src/components/ui/Inputs.tsx), [Form](../../frontend/src/components/ui/Form.tsx) | `/examples/inputs`, `/examples/forms`, [FormsExample](../../frontend/src/features/examples/FormsExample.tsx) |
+| 단일·검색·복수 선택 | [Selections](../../frontend/src/components/ui/Selections.tsx) | `/examples/selections`, [SelectionOptionsExample](../../frontend/src/features/examples/SelectionOptionsExample.tsx) |
+| 날짜·시간 | [DatePickers](../../frontend/src/components/ui/DatePickers.tsx) | `/examples/dates`, [DataExamples](../../frontend/src/features/examples/DataExamples.tsx) |
+| 검색·목록·필터 | [Search](../../frontend/src/components/ui/Search.tsx), [DataGrid](../../frontend/src/components/ui/DataGrid.tsx) | `/users`, `/departments`, [DirectoryScreen](../../frontend/src/features/data/DirectoryScreen.tsx) |
+| 파일 선택·업로드·재조회 | [FileUpload](../../frontend/src/components/ui/FileUpload.tsx) | `/examples/files`, [FilesPanel](../../frontend/src/features/files/FilesPanel.tsx) |
+
+스타일은 [공통 토큰](../../frontend/src/styles/tokens.css)과 [UI CSS Modules](../../frontend/src/components/ui/ui.module.css)를 재사용한다. 메뉴 경로는 [navigation.ts](../../frontend/src/config/navigation.ts)가 소유한다. 폼 예제의 제출 테스트와 실제 서버 저장을 구분하며, API·권한·저장 판단은 해당 백엔드 업무 구현이 최종 확인한다. 프론트 입력 안내를 서버 검증 생략의 근거로 쓰지 않는다.
+
+검사 명령은 [프론트 package.json](../../frontend/package.json)과 [백엔드 실행 안내](../../backend/README.md)를 확인한다. 기존 npm 검사·검증 스크립트와 JUnit/Gradle을 우선 활용하고 이 규칙 적용만을 위해 도구를 추가하지 않는다. 실제 검증 범위는 [프론트 기능표](../../frontend/FEATURES.md)와 [백엔드 검증표](../../backend/VERIFICATION.md)에 기록한다.

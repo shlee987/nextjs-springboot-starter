@@ -83,3 +83,11 @@ Java find/get/getRequired의 역할·값 없음 계약은 사용자가 선택한
 사용자가 ProcedureExportRunner 단일 파일 검토를 바탕으로 확정한 정책이다. 함수 설명은 중요한 데이터 출처·핵심 처리·결과와 부수 효과·실패 계약을 포함하고, 다른 함수에 위임한 핵심 동작도 설명한다. comments.md를 원본으로 하고 changes.md에서 실제 구현과의 대조를 요구한다.
 
 데이터 보호는 design.md에서 단일 대상 손상 방지, 여러 대상의 부분 반영 허용 여부, 조회 결과 기반 삭제의 완전성을 구분한다. 임시 저장 후 교체는 가능한 구현 예시이며 모든 작업의 원자성·롤백·백업을 의무화하지 않는다. 이는 사용자와 합의한 개발 정책이며 특정 외부 표준의 직접 인용이 아니다.
+
+## 업무 흐름과 회귀 검증 보강 (2026-11-23)
+
+- [Apache Fory 지침](https://github.com/apache/fory/blob/main/AGENTS.md): 책임 소유자의 구현에서 원인을 수정하고 반복 경로를 줄이는 방식, 구조 정리에서 보존할 동작·계약·성능, 규칙 원본 갱신과 리뷰·검증 근거를 참고했다.
+- [Apache Superset 지침](https://github.com/apache/superset/blob/master/AGENTS.md#code-standards): 공통 UI 정의의 위치와 사용 기준을 프로젝트 지침에서 찾을 수 있게 하는 방식을 참고했다.
+- [Apache Kafka 지침](https://github.com/apache/kafka/blob/trunk/AGENTS.md#coding-conventions), [Apache Flink 호환성 테스트](https://github.com/apache/flink/blob/master/flink-table/flink-table-runtime/AGENTS.md#testing-patterns): 모듈 간 동작을 이어서 검증하고 이전에 저장한 데이터도 비교하는 기준을 참고했다.
+- [Apache DataFusion Comet 오류 분류](https://datafusion.apache.org/comet/contributor-guide/bug_triage.html#prioritization-principles), [설정 동작 변경](https://datafusion.apache.org/comet/contributor-guide/config_conventions.html#changing-the-behavior-of-an-existing-config): 조용히 틀리는 결과를 찾아내고 호환 분기의 근거를 확인하는 기준을 참고했다.
+- [Apache Airflow 테스트 지침](https://github.com/apache/airflow/blob/main/AGENTS.md#testing-standards), [Apache DataFusion 리뷰 지침](https://datafusion.apache.org/contributor-guide/pr_review.html#review-the-test-coverage): 관찰 가능한 기대 결과, 유사 입력을 묶는 테스트, 수정 전후 회귀 검증을 참고했다.

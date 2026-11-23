@@ -21,11 +21,11 @@ DB 접속은 조회만 기본 허용한다. 직접·간접 DB 변경 실행은 `
 | 작업 조건 | 읽을 문서 |
 | --- | --- |
 | 프로젝트 초기 구성, 인증·권한·입력 검증·암호화·비밀값·보안 정책 변경, 서버·DB·클라우드·CI/CD 구성, 보안 점검·취약점 수정 | `docs/conventions/security/guide.md` |
-| 함수·클래스 추가·분리, 책임·호출 구조 변경, 입력·반환 모델 또는 파라미터 구성 선택·변경 | `docs/conventions/common/design.md` |
+| 함수·클래스 추가·분리, 책임·호출 구조·업무 판단·검증 변경, 입력·반환 모델 또는 파라미터 구성 선택·변경 | `docs/conventions/common/design.md` |
 | 예외 처리, 실패 반환, 로그 추가·변경 | `docs/conventions/common/errors.md` |
 | 설정·프로파일·빌드 옵션·상수·상태 값 추가·변경 또는 배치 선택 | `docs/conventions/common/values.md` |
 | 함수 작성·수정, 주석 변경 또는 기존 주석이 있는 코드·쿼리 수정·이동 | `docs/conventions/common/comments.md` |
-| 코드 변경 또는 완료 검증 | `docs/conventions/common/changes.md` |
+| 오류 분석, 수정 계획·구현·리뷰·완료 검증 | `docs/conventions/common/changes.md` |
 | DB 접속 또는 DB를 사용하는 테스트·스크립트·애플리케이션 실행 | `docs/conventions/common/database-access.md` |
 | Java 메서드·클래스 추가 또는 역할 변경 | `docs/conventions/java/roles.md` |
 | Java 코드 작성·수정 | `docs/conventions/java/style.md` |
